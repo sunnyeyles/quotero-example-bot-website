@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Message,
   BotData,
@@ -16,7 +14,6 @@ import {
 } from "@/lib/types";
 import { Upload, Send, X, Bot, User, Loader2, Globe } from "lucide-react";
 import mammoth from "mammoth";
-import { scrapeWebsite } from "@/lib/web-scraper";
 
 export default function TrainYourOwnBot() {
   const [botData, setBotData] = useState<BotData>({
@@ -200,19 +197,6 @@ Title: ${scrapedData.title}
 Content: ${scrapedData.content}
 ${
   scrapedData.links.length > 0 ? `Links: ${scrapedData.links.join("\n")}` : ""
-}`;
-
-      // Create a summary for the manual data textarea
-      const websiteSummary = `Website Summary:
-URL: ${botData.websiteUrl}
-Title: ${scrapedData.title}
-Key Content: ${scrapedData.content.substring(0, 500)}${
-        scrapedData.content.length > 500 ? "..." : ""
-      }
-${
-  scrapedData.links.length > 0
-    ? "Important Links: " + scrapedData.links.slice(0, 5).join(", ")
-    : ""
 }`;
 
       // First, set the raw website content
@@ -561,7 +545,7 @@ ${
             <div className="space-y-4 flex-1">
               <div>
                 <h3 className="text-sm font-medium mb-2">
-                  What we're discussing
+                  What we&apos;re discussing
                 </h3>
                 {messages.length === 0 ? (
                   <p className="text-sm italic">
@@ -587,7 +571,7 @@ ${
                 <div>
                   <h3 className="text-sm font-medium mb-2">Recent Topics</h3>
                   <div className="space-y-1">
-                    {messages.slice(-3).map((message, index) => (
+                    {messages.slice(-3).map((message) => (
                       <div key={message.id} className="text-xs p-2 rounded">
                         <div className="flex items-center mb-1">
                           <div

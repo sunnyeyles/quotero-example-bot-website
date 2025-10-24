@@ -3,10 +3,8 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default function About() {
   return (
@@ -19,8 +17,8 @@ export default function About() {
               About <span className="text-blue-600">Quotero</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              We're on a mission to revolutionize how businesses manage their
-              quotes and streamline their sales processes.
+              We&apos;re on a mission to revolutionize how businesses manage
+              their quotes and streamline their sales processes.
             </p>
           </div>
         </div>
@@ -41,7 +39,7 @@ export default function About() {
                 effortless.
               </p>
               <p className="text-lg text-gray-600 mb-6">
-                We've grown from a small startup to serving over 10,000
+                We&apos;ve grown from a small startup to serving over 10,000
                 businesses worldwide, helping them save time, reduce errors, and
                 close more deals.
               </p>
@@ -125,7 +123,7 @@ export default function About() {
                 </div>
                 <CardTitle className="text-xl mb-2">Customer First</CardTitle>
                 <CardDescription>
-                  Every decision we make is guided by what's best for our
+                  Every decision we make is guided by what&apos;s best for our
                   customers and their success.
                 </CardDescription>
               </CardContent>
@@ -155,7 +153,7 @@ export default function About() {
               Meet Our Team
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              The passionate people behind Quotero's success
+              The passionate people behind Quotero&apos;s success
             </p>
           </div>
 
@@ -213,8 +211,8 @@ export default function About() {
               Why Choose Quotero?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We're not just another software company - we're your partners in
-              success
+              We&apos;re not just another software company - we&apos;re your
+              partners in success
             </p>
           </div>
 

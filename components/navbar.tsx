@@ -16,8 +16,6 @@ export default function Navbar() {
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Bots", href: "/bots" },
-    { name: "Prices", href: "/prices" },
-    { name: "FAQs", href: "/faqs" },
   ];
 
   return (
@@ -26,7 +24,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-gray-900">
+            <Link href="/" className="text-2xl font-bold">
               Quotero
             </Link>
           </div>
@@ -38,7 +36,7 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   {item.name}
                 </Link>
@@ -68,12 +66,12 @@ export default function Navbar() {
       {/* Mobile Navigation */}
       {isOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                className="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
