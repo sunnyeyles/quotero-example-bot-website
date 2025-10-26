@@ -16,31 +16,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create a system prompt for generating opening messages
-    const systemPrompt = `You are an expert at creating short, engaging opening messages for AI chatbots. Your task is to generate a brief, welcoming opening message that:
+    // Create personality-based system prompt
+    const personalityConfig = {
+      name: botName,
+      personality: botPersonality,
+      tone: botPersonality,
+      behavior: botPersonality,
+    };
 
-1. **Introduces the bot** with their name
-2. **Mentions the business** they work for (extracted from training data)
-3. **Highlights ONE key service** or what the business does
-4. **Ends with a simple question**
-5. **Uses British English** spelling and Australian business context
+    const systemPrompt = `You are creating an opening message for an AI chatbot with the following configuration:
 
-The opening message should be:
-- Short and sweet (1-2 sentences maximum)
-- Conversational and friendly
-- Specific to the business (not generic)
-- Simple and direct
+CONFIGURATION:
+${JSON.stringify(personalityConfig, null, 2)}
+
+CRITICAL INSTRUCTIONS:
+- The opening message MUST match the personality, tone, and behavior specified above exactly
+- If the personality is "rude and vague", create a rude and vague opening message
+- If the personality is "friendly and helpful", create a friendly and helpful opening message
+- If the personality is "professional and formal", create a professional and formal opening message
+- The personality configuration overrides all other instructions
+
+The opening message should:
+- Be 1-2 sentences maximum
+- Match the personality exactly
+- Introduce the bot with their name
+- Use British English spelling
+- Be specific to the business context
 
 Format: Generate only the opening message text, no additional formatting or explanations.`;
 
-    const userPrompt = `Generate a short, sweet opening message for a chatbot:
+    const userPrompt = `Generate an opening message for a chatbot:
 
 Bot Name: ${botName}
 Bot Personality: ${botPersonality}
 
 Business Info: ${trainingData || "No specific training data provided"}
 
-Create a brief, friendly opening message (1-2 sentences) that introduces the bot and mentions what they can help with.`;
+Create an opening message that matches the personality exactly. If the personality is "rude and vague", make it rude and vague. If it's "friendly and helpful", make it friendly and helpful.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -54,7 +66,34 @@ Create a brief, friendly opening message (1-2 sentences) that introduces the bot
 
     const openingMessage =
       completion.choices[0]?.message?.content ||
-      `Hello! I'm ${botName} from this business. I'm here to help you with your needs. How can I assist you today?`;
+      generateFallbackOpening(botName, botPersonality);
+
+    // Fallback opening message generator based on personality
+    function generateFallbackOpening(
+      name: string,
+      personality: string
+    ): string {
+      const lowerPersonality = personality.toLowerCase();
+
+      if (
+        lowerPersonality.includes("rude") ||
+        lowerPersonality.includes("vague")
+      ) {
+        return `Yeah, I'm ${name}. What do you want?`;
+      } else if (
+        lowerPersonality.includes("friendly") ||
+        lowerPersonality.includes("helpful")
+      ) {
+        return `Hi there! I'm ${name} and I'm here to help you with whatever you need. How can I assist you today?`;
+      } else if (
+        lowerPersonality.includes("professional") ||
+        lowerPersonality.includes("formal")
+      ) {
+        return `Good day. I am ${name}, your professional assistant. How may I be of service?`;
+      } else {
+        return `Hello! I'm ${name} from this business. I'm here to help you with your needs. How can I assist you today?`;
+      }
+    }
 
     return NextResponse.json({
       openingMessage: openingMessage.trim(),

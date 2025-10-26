@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +12,20 @@ import {
   ChatRequest,
   ChatResponse,
 } from "@/lib/types";
-import { Upload, Send, X, Bot, User, Loader2, Globe } from "lucide-react";
+import {
+  Upload,
+  Send,
+  X,
+  Bot,
+  User,
+  Loader2,
+  Globe,
+  Share2,
+  Copy,
+  Check,
+} from "lucide-react";
 import mammoth from "mammoth";
+import LZString from "lz-string";
 
 export default function TrainYourOwnBot() {
   const [botData, setBotData] = useState<BotData>({
@@ -25,12 +37,15 @@ export default function TrainYourOwnBot() {
     websiteContent: "",
   });
 
+  const [manualTrainingData, setManualTrainingData] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isScraping, setIsScraping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,6 +56,106 @@ export default function TrainYourOwnBot() {
       scrollToBottom();
     }
   }, [messages]);
+
+  // Load shared conversation from URL on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        try {
+          const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+          if (decompressed) {
+            const sharedData = JSON.parse(decompressed);
+            if (sharedData.botData) {
+              // Ensure all fields exist with defaults
+              setBotData({
+                name: sharedData.botData.name || "",
+                personality: sharedData.botData.personality || "",
+                trainingData: sharedData.botData.trainingData || "",
+                files: sharedData.botData.files || [],
+                websiteUrl: sharedData.botData.websiteUrl || "",
+                websiteContent: sharedData.botData.websiteContent || "",
+              });
+            }
+            if (sharedData.messages && Array.isArray(sharedData.messages)) {
+              // Convert timestamp strings back to Date objects
+              const messagesWithDates = sharedData.messages.map(
+                (msg: Message) => ({
+                  ...msg,
+                  timestamp: new Date(msg.timestamp),
+                })
+              );
+              setMessages(messagesWithDates);
+            }
+            // Clear the hash after loading
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        } catch (error) {
+          console.error("Failed to load shared conversation:", error);
+        }
+      }
+    }
+  }, []);
+
+  // Auto-update training data when name, personality, website content, or files change
+  useEffect(() => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set a new timer with 500ms debounce
+    debounceTimerRef.current = setTimeout(() => {
+      // Combine all sources
+      const personalityTrainingData = botData.personality
+        ? `Bot Name: ${botData.name}\n\nBot Personality and Behavior Guidelines:\n${botData.personality}\n\n`
+        : botData.name
+        ? `Bot Name: ${botData.name}\n\n`
+        : "";
+
+      const websiteTrainingData = botData.websiteContent
+        ? botData.websiteContent + "\n\n"
+        : "";
+      const filesTrainingData =
+        botData.files && botData.files.length > 0
+          ? botData.files
+              .map((f) => `File: ${f.name}\n${f.content}`)
+              .join("\n\n") + "\n\n"
+          : "";
+
+      const manualData = manualTrainingData
+        ? `Additional Training Data:\n${manualTrainingData}\n\n`
+        : "";
+
+      // Combine everything
+      const combinedTrainingData = [
+        personalityTrainingData,
+        websiteTrainingData,
+        filesTrainingData,
+        manualData,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      setBotData((prev) => ({
+        ...prev,
+        trainingData: combinedTrainingData,
+      }));
+    }, 500);
+
+    // Cleanup function
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [
+    botData.name,
+    botData.personality,
+    botData.websiteContent,
+    botData.files,
+    manualTrainingData,
+  ]);
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -69,8 +184,6 @@ export default function TrainYourOwnBot() {
         setBotData((prev) => ({
           ...prev,
           files: [...prev.files, uploadedFile],
-          trainingData:
-            prev.trainingData + (prev.trainingData ? "\n\n" : "") + content,
         }));
       } catch (err) {
         setError(
@@ -149,15 +262,10 @@ export default function TrainYourOwnBot() {
       if (!fileToRemove) return prev;
 
       const updatedFiles = prev.files.filter((f) => f.id !== fileId);
-      const updatedTrainingData = prev.trainingData
-        .replace(fileToRemove.content, "")
-        .replace(/\n\n+/g, "\n\n")
-        .trim();
 
       return {
         ...prev,
         files: updatedFiles,
-        trainingData: updatedTrainingData,
       };
     });
   };
@@ -192,22 +300,14 @@ export default function TrainYourOwnBot() {
         return;
       }
 
-      const websiteContent = `Website: ${botData.websiteUrl}
-Title: ${scrapedData.title}
+      const websiteContent = `Title: ${scrapedData.title}
 Content: ${scrapedData.content}
 ${
   scrapedData.links.length > 0 ? `Links: ${scrapedData.links.join("\n")}` : ""
 }`;
 
-      // First, set the raw website content
-      setBotData((prev) => ({
-        ...prev,
-        websiteContent,
-      }));
-
-      // Website data loaded successfully
-
       // Now call the business analysis API to get intelligent insights
+      // Only store the parsed natural language content in training data
       try {
         const analysisResponse = await fetch("/api/analyze-business", {
           method: "POST",
@@ -220,17 +320,20 @@ ${
         if (analysisResponse.ok) {
           const analysisData = await analysisResponse.json();
           if (analysisData.success && analysisData.businessAnalysis) {
-            // Update both website content and manual data with the AI-generated business analysis
+            // Only set website content if we have AI-generated natural language analysis
             setBotData((prev) => ({
               ...prev,
               websiteContent: analysisData.businessAnalysis,
-              trainingData: analysisData.businessAnalysis,
             }));
           }
         }
       } catch (analysisError) {
         console.error("Business analysis failed:", analysisError);
-        // Keep the raw content if analysis fails
+        // Don't set any website content if analysis fails
+        setBotData((prev) => ({
+          ...prev,
+          websiteContent: "",
+        }));
       }
     } catch (err) {
       setError(
@@ -247,14 +350,8 @@ ${
     console.log("Bot Data:", botData);
     setError(null);
 
-    // Combine all training data sources
-    const allTrainingData = [
-      botData.trainingData,
-      botData.websiteContent,
-      ...botData.files.map((f) => f.content),
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+    // Training data is already auto-combined from all sources
+    const allTrainingData = botData.trainingData;
 
     // Generate intelligent opening message based on training data
     let openingMessage = "";
@@ -371,6 +468,40 @@ ${
     }
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const shareConversation = async () => {
+    try {
+      // Create shareable data object with all fields
+      const shareableData = {
+        botData: {
+          ...botData,
+          files: [], // Don't share file uploads, just the content
+        },
+        messages: messages,
+      };
+
+      // Compress and encode the data
+      const jsonString = JSON.stringify(shareableData);
+      const compressed = LZString.compressToEncodedURIComponent(jsonString);
+
+      // Create the shareable URL
+      const shareableUrl = `${window.location.origin}${window.location.pathname}#${compressed}`;
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareableUrl);
+
+      // Show success feedback
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 3000);
+    } catch (error) {
+      setError("Failed to share conversation");
+      console.error("Share error:", error);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
@@ -421,7 +552,7 @@ ${
 
             <div>
               <label className="block text-sm font-medium mb-3">
-                Website Data
+                Paste Your Website URL
               </label>
               <div className="flex space-x-3">
                 <Input
@@ -432,6 +563,20 @@ ${
                       websiteUrl: e.target.value,
                     }))
                   }
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pastedText = e.clipboardData.getData("text");
+                    if (pastedText && pastedText.trim()) {
+                      setBotData((prev) => ({
+                        ...prev,
+                        websiteUrl: pastedText.trim(),
+                      }));
+                      // Small delay to ensure state is updated before scraping
+                      setTimeout(() => {
+                        handleWebsiteScrape();
+                      }, 100);
+                    }
+                  }}
                   placeholder="https://example.com"
                 />
                 <Button
@@ -442,12 +587,12 @@ ${
                   {isScraping ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Scraping...
+                      Loading...
                     </>
                   ) : (
                     <>
                       <Globe className="w-4 h-4 mr-2" />
-                      Scrape Website
+                      Get Website Data
                     </>
                   )}
                 </Button>
@@ -456,10 +601,10 @@ ${
 
             <div>
               <label className="block text-sm font-medium mb-3">
-                Upload Files
+                Upload Training Data Files
               </label>
 
-              {botData.files.length > 0 && (
+              {botData.files && botData.files.length > 0 && (
                 <div className="mb-3">
                   <div className="flex flex-wrap gap-2">
                     {botData.files.map((file) => (
@@ -507,18 +652,13 @@ ${
 
           <div>
             <label className="block text-sm font-medium mb-3">
-              Training Data
+              Training Data (Auto-generated from all sources)
             </label>
             <Textarea
               value={botData.trainingData}
-              onChange={(e) =>
-                setBotData((prev) => ({
-                  ...prev,
-                  trainingData: e.target.value,
-                }))
-              }
-              placeholder="Add FAQs, company info, etc."
-              className="min-h-[400px]"
+              readOnly
+              placeholder="Your combined training data will appear here automatically"
+              className="min-h-[400px] bg-white"
             />
           </div>
         </div>
@@ -539,106 +679,51 @@ ${
           <Card className="p-6 h-[600px] flex flex-col">
             <div className="flex items-center mb-4">
               <Bot className="w-4 h-4 mr-3" />
-              <h2 className="text-lg font-semibold">Conversation Summary</h2>
+              <h2 className="text-lg font-semibold">Quick Actions</h2>
             </div>
 
             <div className="space-y-4 flex-1">
               <div>
-                <h3 className="text-sm font-medium mb-2">
-                  What we&apos;re discussing
-                </h3>
-                {messages.length === 0 ? (
-                  <p className="text-sm italic">
-                    No conversation yet. Start chatting to see topics here.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <span className="font-medium">{messages.length}</span>{" "}
-                      messages exchanged
-                    </div>
-                    <div className="text-sm">
-                      Last message:{" "}
-                      {messages[
-                        messages.length - 1
-                      ]?.timestamp.toLocaleTimeString()}
-                    </div>
-                  </div>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={scrollToTop}
+                >
+                  Update Bot Training
+                </Button>
               </div>
-
-              {messages.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Recent Topics</h3>
-                  <div className="space-y-1">
-                    {messages.slice(-3).map((message) => (
-                      <div key={message.id} className="text-xs p-2 rounded">
-                        <div className="flex items-center mb-1">
-                          <div
-                            className={`w-2 h-2 rounded-full mr-2 ${
-                              message.role === "user"
-                                ? "bg-blue-500"
-                                : "bg-green-500"
-                            }`}
-                          ></div>
-                          <span className="font-medium">
-                            {message.role === "user" ? "You" : "Bot"}
-                          </span>
-                        </div>
-                        <p>
-                          {message.content.substring(0, 100)}
-                          {message.content.length > 100 && "..."}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div>
-                <h3 className="text-sm font-medium mb-2">Bot Context</h3>
-                <div className="space-y-2">
-                  <div className="text-xs">
-                    <span className="font-medium">Name:</span>{" "}
-                    {botData.name || "Not set"}
-                  </div>
-                  <div className="text-xs">
-                    <span className="font-medium">Personality:</span>{" "}
-                    {botData.personality ? "Configured" : "Not set"}
-                  </div>
-                  <div className="text-xs">
-                    <span className="font-medium">Training:</span>{" "}
-                    {botData.trainingData.trim() ||
-                    botData.files.length > 0 ||
-                    botData.websiteUrl
-                      ? "Data loaded"
-                      : "No data"}
-                  </div>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={shareConversation}
+                  disabled={messages.length === 0 || !botData.name}
+                >
+                  {isCopied ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share Your Bot
+                    </>
+                  )}
+                </Button>
               </div>
-
               <div>
-                <h3 className="text-sm font-medium mb-2">Quick Actions</h3>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setMessages([])}
-                    disabled={messages.length === 0}
-                  >
-                    Clear Conversation
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={saveBotData}
-                    disabled={!botData.name || !botData.personality}
-                  >
-                    Save Bot
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setMessages([])}
+                  disabled={messages.length === 0}
+                >
+                  Clear Conversation
+                </Button>
               </div>
             </div>
           </Card>
@@ -710,7 +795,7 @@ ${
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 placeholder="Type your message..."
                 disabled={isLoading}
               />

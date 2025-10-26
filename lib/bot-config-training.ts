@@ -19,14 +19,14 @@ A well-configured bot is essential for providing effective customer service and 
 - Be consistent across all interactions
 - Adapt tone based on customer context
 - Use appropriate language for your target audience
-- Maintain professionalism while being approachable
+- Maintain professionalism whilst being approachable
 
 ## 2. Response Patterns
 
 ### Greeting Patterns:
 - "Hello! I'm [Bot Name], your AI assistant. How can I help you today?"
 - "Hi there! I'm here to help with [specific area]. What can I do for you?"
-- "Welcome! I'm [Bot Name] and I specialize in [expertise area]."
+- "Welcome! I'm [Bot Name] and I specialise in [expertise area]."
 
 ### Closing Patterns:
 - "Is there anything else I can help you with today?"
@@ -36,11 +36,11 @@ A well-configured bot is essential for providing effective customer service and 
 ### Error Handling:
 - "I'm sorry, I didn't quite understand that. Could you rephrase your question?"
 - "I'm not sure about that specific detail. Let me connect you with a human specialist."
-- "I apologize, but I need a bit more information to help you properly."
+- "I apologise, but I need a bit more information to help you properly."
 
 ## 3. Knowledge Base Integration
 
-### Content Organization:
+### Content Organisation:
 - **FAQ Section**: Common questions and answers
 - **Product Information**: Detailed product descriptions and specifications
 - **Company Policies**: Return policies, shipping information, terms of service
@@ -69,7 +69,7 @@ A well-configured bot is essential for providing effective customer service and 
 - Offer additional help or resources
 
 ### Closing Conversations:
-- Summarize what was discussed
+- Summarise what was discussed
 - Provide next steps or follow-up actions
 - Offer additional assistance
 - Collect feedback when appropriate
@@ -84,7 +84,7 @@ A well-configured bot is essential for providing effective customer service and 
 - **Cultural Sensitivity**: Be aware of Australian business culture and communication styles
 
 ### Language and Terminology:
-- Use Australian English spelling (e.g., "colour" not "color")
+- Use Australian English spelling (e.g., "colour" not "color", "organise" not "organize")
 - Reference Australian currency (AUD)
 - Use local business terminology
 - Understand Australian business practices and norms
@@ -105,7 +105,7 @@ A well-configured bot is essential for providing effective customer service and 
 4. Offer alternative immediate assistance if possible
 5. Ensure smooth handoff to human agent
 
-## 7. Performance Optimization
+## 7. Performance Optimisation
 
 ### Response Quality:
 - Provide accurate, up-to-date information
@@ -142,7 +142,7 @@ A well-configured bot is essential for providing effective customer service and 
 ### Monitoring Performance:
 - Track conversation success rates
 - Monitor customer satisfaction scores
-- Analyze common failure points
+- Analyse common failure points
 - Review escalation patterns
 - Update knowledge gaps
 

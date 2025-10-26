@@ -122,23 +122,7 @@ export default function Bots() {
                 )}
 
                 <CardContent className="p-8 text-center">
-                  <div
-                    className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                      bot.color === "blue"
-                        ? "bg-blue-100"
-                        : bot.color === "green"
-                        ? "bg-green-100"
-                        : bot.color === "purple"
-                        ? "bg-purple-100"
-                        : bot.color === "orange"
-                        ? "bg-orange-100"
-                        : bot.color === "indigo"
-                        ? "bg-indigo-100"
-                        : "bg-red-100"
-                    }`}
-                  >
-                    {bot.icon}
-                  </div>
+                  <div>{bot.icon}</div>
 
                   <CardTitle className="text-xl mb-3">{bot.title}</CardTitle>
                   <CardDescription className="text-gray-600 mb-6">

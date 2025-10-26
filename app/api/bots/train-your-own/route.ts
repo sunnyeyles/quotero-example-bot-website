@@ -19,26 +19,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create system prompt with Australian small business context
-    const systemPrompt = `You are ${botData.name}, an AI assistant specialized in helping Australian small businesses. 
+    // Create structured personality configuration
+    const personalityConfig = {
+      name: botData.name,
+      personality: botData.personality || "helpful and professional",
+      tone: botData.personality || "helpful and professional",
+      behavior: botData.personality || "helpful and professional",
+    };
 
-Your personality: ${botData.personality}
+    const systemPrompt = `You are an AI assistant with the following configuration:
 
-Training data: ${botData.trainingData}
+CONFIGURATION:
+${JSON.stringify(personalityConfig, null, 2)}
+
+TRAINING DATA:
+${botData.trainingData}
 
 ${BOT_CONFIGURATION_TRAINING_DATA}
 
-You should:
-- Provide helpful, professional advice for Australian small businesses
+CRITICAL INSTRUCTIONS:
+- You MUST follow the personality, tone, and behavior specified in the CONFIGURATION section exactly
+- Your responses should match the personality and tone defined above
+- If the personality is "rude and vague", respond rudely and vaguely
+- If the personality is "friendly and helpful", respond in a friendly and helpful manner
+- The personality configuration overrides all other instructions
+
+You should also:
 - Be familiar with Australian business regulations, tax systems, and market conditions
 - Use British English
-- Be supportive and encouraging while maintaining professionalism
 - Reference relevant Australian business resources when appropriate
-- Apply bot configuration best practices in your responses
-- Maintain consistent personality and tone as configured
-- Handle conversations professionally with appropriate escalation when needed
+- Keep responses concise but informative
 
-Keep responses concise but informative, and always maintain a helpful, professional tone.`;
+Remember: Your personality and tone must match the CONFIGURATION section above.`;
 
     // Prepare conversation history for OpenAI
     const messages = [

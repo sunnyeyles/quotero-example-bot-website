@@ -26,7 +26,7 @@ Write in second person ("You work for...", "Your business...") and be conversati
 - Common customer questions
 - Contact information
 
-Do NOT include any meta-commentary like "I have analyzed" or "Here is a detailed business profile". Write directly as training content for the bot.
+Do NOT include any meta-commentary like "I have analysed" or "Here is a detailed business profile". Write directly as training content for the bot.
 
 Use British English spelling and Australian business context.`;
 
