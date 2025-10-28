@@ -16,6 +16,7 @@ import {
   Check,
 } from "lucide-react";
 import { useTrainYourOwnBot } from "@/hooks/useTrainYourOwnBot";
+import { StepBreadcrumb } from "@/components/step-breadcrumb";
 
 export default function TrainYourOwnBot() {
   const {
@@ -50,49 +51,40 @@ export default function TrainYourOwnBot() {
   } = useTrainYourOwnBot();
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Train Your Own Bot</h1>
-        <p>Create a custom AI assistant for your Australian small business</p>
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+          Train Your Own Bot
+        </h1>
+        <p className="text-sm sm:text-base">
+          Create a custom AI assistant for your Australian small business
+        </p>
       </div>
 
-      {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-center space-x-4">
-          {[1, 2, 3, 4].map((step) => (
-            <div key={step} className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step <= currentStep
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {step}
-              </div>
-              <div className="ml-2 text-sm font-medium">
-                {step === 1 && "Bot Identity & Appearance"}
-                {step === 2 && "Content & Knowledge Feed"}
-                {step === 3 && "Preview Training Data"}
-                {step === 4 && "Test Your Bot"}
-              </div>
-              {step < 4 && (
-                <div
-                  className={`w-16 h-0.5 mx-4 ${
-                    step < currentStep ? "bg-primary" : "bg-muted"
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Step Breadcrumbs */}
+      <div className="mb-4 sm:mb-6">
+        <StepBreadcrumb
+          currentStep={currentStep}
+          onStepClick={(step) => {
+            // Navigate to the clicked step if it's accessible
+            if (step <= currentStep) {
+              // You can implement step navigation logic here
+              // For now, we'll just scroll to the step
+              const stepElement = document.getElementById(`step-${step}`);
+              if (stepElement) {
+                stepElement.scrollIntoView({ behavior: "smooth" });
+              }
+            }
+          }}
+          itemsToDisplay={3}
+        />
       </div>
 
       {/* Step Content */}
-      <Card className="p-6 mb-8">
+      <Card className="p-4 sm:p-6 mb-6 sm:mb-8">
         {/* Step 1: Bot Identity & Appearance */}
         {currentStep === 1 && (
-          <div className="space-y-6">
+          <div id="step-1" className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">
                 Bot Identity & Appearance
@@ -136,7 +128,7 @@ export default function TrainYourOwnBot() {
 
         {/* Step 2: Content & Knowledge Feed */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div id="step-2" className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">
                 Content & Knowledge Feed
@@ -147,7 +139,7 @@ export default function TrainYourOwnBot() {
                   <label className="block text-sm font-medium mb-3">
                     Website URL
                   </label>
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                     <Input
                       value={botData.websiteUrl}
                       onChange={(e) =>
@@ -167,6 +159,7 @@ export default function TrainYourOwnBot() {
                         }
                       }}
                       placeholder="https://example.com"
+                      className="flex-1"
                     />
                   </div>
                 </div>
@@ -182,16 +175,17 @@ export default function TrainYourOwnBot() {
                         {botData.files.map((file) => (
                           <div
                             key={file.id}
-                            className="flex items-center p-2 rounded border text-xs"
+                            className="flex items-center p-2 rounded border text-xs min-w-0"
                           >
-                            <Upload className="w-3 h-3 mr-1" />
-                            <span className="truncate max-w-20">
+                            <Upload className="w-3 h-3 mr-1 shrink-0" />
+                            <span className="truncate max-w-20 sm:max-w-32">
                               {file.name}
                             </span>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => removeFile(file.id)}
+                              className="ml-1 shrink-0"
                             >
                               <X className="w-3 h-3" />
                             </Button>
@@ -241,7 +235,7 @@ export default function TrainYourOwnBot() {
 
         {/* Step 3: Preview Training Data */}
         {currentStep === 3 && (
-          <div className="space-y-6">
+          <div id="step-3" className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">
                 Preview Training Data
@@ -274,7 +268,7 @@ export default function TrainYourOwnBot() {
 
         {/* Step 4: Test Your Bot */}
         {currentStep === 4 && (
-          <div className="space-y-6">
+          <div id="step-4" className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Test Your Bot</h2>
               <p className="text-sm text-muted-foreground mb-6">
@@ -326,8 +320,10 @@ export default function TrainYourOwnBot() {
                                 {message.role === "user" && (
                                   <User className="w-3 h-3 mt-0.5 shrink-0" />
                                 )}
-                                <div className="flex-1">
-                                  <p className="text-xs">{message.content}</p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs wrap-break-word">
+                                    {message.content}
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -356,7 +352,7 @@ export default function TrainYourOwnBot() {
                         }
                         placeholder="Type your message..."
                         disabled={isLoading}
-                        className="text-xs"
+                        className="text-xs flex-1"
                       />
                       <Button
                         onClick={sendMessage}
@@ -371,12 +367,13 @@ export default function TrainYourOwnBot() {
               </div>
 
               <div className="mt-6 pt-6 border-t">
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                     <Button
                       variant="outline"
                       onClick={shareConversation}
                       disabled={messages.length === 0 || !botData.name}
+                      className="w-full sm:w-auto"
                     >
                       {isCopied ? (
                         <>
@@ -394,6 +391,7 @@ export default function TrainYourOwnBot() {
                       variant="outline"
                       onClick={() => setMessages([])}
                       disabled={messages.length === 0}
+                      className="w-full sm:w-auto"
                     >
                       Clear Conversation
                     </Button>
@@ -401,6 +399,7 @@ export default function TrainYourOwnBot() {
                   <Button
                     onClick={saveBotData}
                     disabled={!botData.name || !botData.personality}
+                    className="w-full sm:w-auto"
                   >
                     Launch Bot
                   </Button>
@@ -412,11 +411,12 @@ export default function TrainYourOwnBot() {
       </Card>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
         <Button
           variant="outline"
           onClick={prevStep}
           disabled={currentStep === 1}
+          className="w-full sm:w-auto"
         >
           {currentStep === 2
             ? "Back to Step 1"
@@ -429,6 +429,7 @@ export default function TrainYourOwnBot() {
         <Button
           onClick={() => nextStep()}
           disabled={!canProceedToNext() || currentStep === 4 || isScraping}
+          className="w-full sm:w-auto"
         >
           {isScraping ? (
             <>

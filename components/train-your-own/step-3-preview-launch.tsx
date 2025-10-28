@@ -60,9 +60,7 @@ export function Step3PreviewLaunch({
               Test Your Bot
             </label>
             <Card className="p-4 h-[300px] flex flex-col">
-              {error && (
-                <div className="mb-4 p-3 rounded border text-sm">{error}</div>
-              )}
+              {error && <div className="mb-4 p-3 border text-sm">{error}</div>}
 
               <div className="flex-1 overflow-y-auto mb-4 space-y-4">
                 {messages.length === 0 ? (
@@ -96,8 +94,10 @@ export function Step3PreviewLaunch({
                           {message.role === "user" && (
                             <User className="w-3 h-3 mt-0.5 shrink-0" />
                           )}
-                          <div className="flex-1">
-                            <p className="text-xs">{message.content}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs wrap-break-word">
+                              {message.content}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -122,7 +122,7 @@ export function Step3PreviewLaunch({
                   onKeyDown={handleKeyPress}
                   placeholder="Type your message..."
                   disabled={isLoading}
-                  className="text-xs"
+                  className="text-xs flex-1"
                 />
                 <Button
                   onClick={sendMessage}
@@ -137,12 +137,13 @@ export function Step3PreviewLaunch({
         </div>
 
         <div className="mt-6 pt-6 border-t">
-          <div className="flex justify-between items-center">
-            <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <Button
                 variant="outline"
                 onClick={shareConversation}
                 disabled={messages.length === 0 || !botData.name}
+                className="w-full sm:w-auto"
               >
                 {isCopied ? (
                   <>
@@ -160,6 +161,7 @@ export function Step3PreviewLaunch({
                 variant="outline"
                 onClick={() => setMessages([])}
                 disabled={messages.length === 0}
+                className="w-full sm:w-auto"
               >
                 Clear Conversation
               </Button>
@@ -167,6 +169,7 @@ export function Step3PreviewLaunch({
             <Button
               onClick={saveBotData}
               disabled={!botData.name || !botData.personality}
+              className="w-full sm:w-auto"
             >
               Launch Bot
             </Button>
