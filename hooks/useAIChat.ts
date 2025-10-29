@@ -85,34 +85,19 @@ export function useAIChat(options: UseAIChatOptions = {}): UseAIChatReturn {
             if (done) break;
 
             const chunk = decoder.decode(value);
-            const lines = chunk.split("\n");
 
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = line.slice(6);
-                if (data === "[DONE]") {
-                  break;
-                }
-
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.content) {
-                    assistantContent += parsed.content;
-                    // Update the last message (assistant's message) with accumulated content
-                    setMessages((prev) => {
-                      const updated = [...prev];
-                      updated[updated.length - 1] = {
-                        role: "assistant",
-                        content: assistantContent,
-                      };
-                      return updated;
-                    });
-                  }
-                } catch (e) {
-                  // Skip invalid JSON chunks
-                  continue;
-                }
-              }
+            // For text stream, we get the text directly
+            if (chunk) {
+              assistantContent += chunk;
+              // Update the last message (assistant's message) with accumulated content
+              setMessages((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                  role: "assistant",
+                  content: assistantContent,
+                };
+                return updated;
+              });
             }
           }
         } finally {

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       name: botName,
       personality: botPersonality,
       tone: botPersonality,
-      behavior: botPersonality,
+      behaviour: botPersonality,
     };
 
     const systemPrompt = `You are creating an opening message for an AI chatbot with the following configuration:
@@ -30,7 +30,7 @@ CONFIGURATION:
 ${JSON.stringify(personalityConfig, null, 2)}
 
 CRITICAL INSTRUCTIONS:
-- The opening message MUST match the personality, tone, and behavior specified above exactly
+- The opening message MUST match the personality, tone, and behaviour specified above exactly
 - If the personality is "rude and vague", create a rude and vague opening message
 - If the personality is "friendly and helpful", create a friendly and helpful opening message
 - If the personality is "professional and formal", create a professional and formal opening message

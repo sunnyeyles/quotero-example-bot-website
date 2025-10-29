@@ -3,13 +3,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { PaintingDetails, ROOM_TYPES } from "./types";
 
 interface StepOneProps {
@@ -60,18 +54,17 @@ export function StepOne({ data, onDataChange }: StepOneProps) {
           What type of room or area are you painting?
         </p>
 
-        <Select value={data.roomType} onValueChange={handleRoomTypeChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select room type" />
-          </SelectTrigger>
-          <SelectContent>
-            {ROOM_TYPES.map((roomType) => (
-              <SelectItem key={roomType} value={roomType}>
-                {roomType}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Combobox
+          options={ROOM_TYPES.map((roomType) => ({
+            value: roomType,
+            label: roomType,
+          }))}
+          value={data.roomType}
+          onValueChange={handleRoomTypeChange}
+          placeholder="Select room type"
+          searchPlaceholder="Search room types..."
+          emptyMessage="No room type found."
+        />
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       name: botData.name,
       personality: botData.personality || "helpful and professional",
       tone: botData.personality || "helpful and professional",
-      behavior: botData.personality || "helpful and professional",
+      behaviour: botData.personality || "helpful and professional",
     };
 
     const systemPrompt = `You are an AI assistant with the following configuration:
@@ -38,7 +38,7 @@ ${botData.trainingData}
 ${BOT_CONFIGURATION_TRAINING_DATA}
 
 CRITICAL INSTRUCTIONS:
-- You MUST follow the personality, tone, and behavior specified in the CONFIGURATION section exactly
+- You MUST follow the personality, tone, and behaviour specified in the CONFIGURATION section exactly
 - Your responses should match the personality and tone defined above
 - If the personality is "rude and vague", respond rudely and vaguely
 - If the personality is "friendly and helpful", respond in a friendly and helpful manner

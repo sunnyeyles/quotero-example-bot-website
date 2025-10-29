@@ -91,7 +91,7 @@ export function StepFive({
                   Steep Roof
                 </Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  High pitch (30+ degrees). Requires specialized safety
+                  High pitch (30+ degrees). Requires specialised safety
                   equipment.
                 </p>
               </div>

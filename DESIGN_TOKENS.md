@@ -9,7 +9,7 @@ The design tokens are defined in `app/globals.css` using CSS custom properties a
 - **Consistency**: All components use the same design values
 - **Maintainability**: Change values in one place to update the entire design system
 - **Flexibility**: Easy to override for specific components or themes
-- **Performance**: CSS custom properties are highly optimized
+- **Performance**: CSS custom properties are highly optimised
 
 ## Typography
 
@@ -113,6 +113,10 @@ shadow-none    /* No shadow */
 ```css
 /* Use these classes for consistent elevation */
 .shadow-elevation-1  /* Light elevation */
+/* Light elevation */
+/* Light elevation */
+/* Light elevation */
+/* Light elevation */
 /* Light elevation */
 /* Light elevation */
 /* Light elevation */
@@ -238,6 +242,10 @@ ease-spring     /* cubic-bezier(0.175, 0.885, 0.32, 1.275) */
 /* 150ms ease-out */
 /* 150ms ease-out */
 /* 150ms ease-out */
+/* 150ms ease-out */
+/* 150ms ease-out */
+/* 150ms ease-out */
+/* 150ms ease-out */
 .transition-normal /* 300ms ease-out */
 .transition-slow; /* 500ms ease-out */
 ```
@@ -316,7 +324,7 @@ ease-spring     /* cubic-bezier(0.175, 0.885, 0.32, 1.275) */
 
 ## Customization
 
-To customize any design token, simply update the CSS custom property in `app/globals.css`:
+To customise any design token, simply update the CSS custom property in `app/globals.css`:
 
 ```css
 :root {

@@ -1,0 +1,240 @@
+/* Stepper Component Styles */
+.outer-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.step-circle-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.step-indicator-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.step-indicator:hover {
+  transform: scale(1.05);
+}
+
+.step-indicator-inner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.step-indicator-inner.active {
+  border-color: #5227ff;
+  box-shadow: 0 0 0 4px rgba(82, 39, 255, 0.1);
+}
+
+.step-indicator-inner.complete {
+  border-color: #5227ff;
+}
+
+.step-number {
+  color: white;
+  font-weight: 600;
+}
+
+.active-dot {
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.check-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background-color: #e5e7eb;
+  position: relative;
+  margin: 0 0.5rem;
+}
+
+.step-connector-inner {
+  height: 100%;
+  border-radius: 1px;
+}
+
+.step-content-default {
+  min-height: 200px;
+  padding: 1.5rem 0;
+}
+
+.step-default {
+  padding: 1rem;
+}
+
+.footer-container {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-nav.spread {
+  justify-content: space-between;
+}
+
+.footer-nav.end {
+  justify-content: flex-end;
+}
+
+.back-button,
+.next-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.back-button {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.back-button:hover {
+  background-color: #e5e7eb;
+}
+
+.back-button.inactive {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.next-button {
+  background-color: #5227ff;
+  color: white;
+}
+
+.next-button:hover {
+  background-color: #4c1d95;
+  transform: translateY(-1px);
+}
+
+.next-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .outer-container {
+    padding: 1rem;
+  }
+
+  .step-circle-container {
+    padding: 1.5rem;
+  }
+
+  .step-indicator-row {
+    gap: 0.5rem;
+  }
+
+  .step-indicator-inner {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .step-connector {
+    margin: 0 0.25rem;
+  }
+
+  .footer-nav {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-nav.spread {
+    flex-direction: column;
+  }
+
+  .back-button,
+  .next-button {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .step-circle-container {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .step-indicator-inner {
+    background-color: #374151;
+    color: #9ca3af;
+  }
+
+  .step-indicator-inner.active {
+    background-color: #5227ff;
+    color: white;
+  }
+
+  .step-indicator-inner.complete {
+    background-color: #5227ff;
+    color: #60a5fa;
+  }
+
+  .step-connector {
+    background-color: #374151;
+  }
+
+  .footer-container {
+    border-top-color: #374151;
+  }
+
+  .back-button {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+
+  .back-button:hover {
+    background-color: #4b5563;
+  }
+}

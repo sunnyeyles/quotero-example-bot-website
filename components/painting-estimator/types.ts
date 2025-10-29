@@ -1,3 +1,13 @@
+export interface ContactDetails {
+  clientName: string;
+  email: string;
+  phone: string;
+  address: string;
+  suburb: string;
+  state: string;
+  postcode: string;
+}
+
 export interface RoomDimensions {
   length: number;
   width: number;
@@ -7,6 +17,9 @@ export interface RoomDimensions {
 export interface PaintQuality {
   quality: "good" | "better" | "best";
   pricePerLitre: number;
+  isRealTimePrice?: boolean;
+  priceSource?: string;
+  lastUpdated?: string;
 }
 
 export interface PaintingDetails {
@@ -29,10 +42,25 @@ export interface PaintingCalculation {
   totalLabourCost: number;
   labourSubtotal: number;
   grandTotal: number;
+  gstAmount: number;
+  totalIncludingGst: number;
+  priceData?: {
+    isRealTime: boolean;
+    source: string;
+    lastUpdated: string;
+    paintProducts?: Array<{
+      name: string;
+      price: number;
+      brand: string;
+      category: string;
+    }>;
+  };
 }
 
 export interface QuoteFormData {
+  contactDetails: ContactDetails;
   paintingDetails: PaintingDetails;
+  images: File[];
 }
 
 export const PAINT_QUALITIES = [
@@ -40,6 +68,14 @@ export const PAINT_QUALITIES = [
   { quality: "better" as const, label: "Better Quality", pricePerLitre: 50 },
   { quality: "best" as const, label: "Best Quality", pricePerLitre: 65 },
 ];
+
+// Helper function to get category key for paint quality
+export function getPaintCategoryKey(
+  scope: "interior" | "exterior",
+  quality: "good" | "better" | "best"
+): string {
+  return `${scope}-${quality}`;
+}
 
 export const ROOM_TYPES = [
   "Living Room",

@@ -72,7 +72,7 @@ export default function TrainYourOwnBot() {
               // For now, we'll just scroll to the step
               const stepElement = document.getElementById(`step-${step}`);
               if (stepElement) {
-                stepElement.scrollIntoView({ behavior: "smooth" });
+                stepElement.scrollIntoView({ behaviour: "smooth" });
               }
             }
           }}

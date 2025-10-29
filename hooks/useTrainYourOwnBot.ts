@@ -40,11 +40,11 @@ export function useTrainYourOwnBot() {
 
   // Utility functions
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behaviour: "smooth" });
   }, []);
 
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behaviour: "smooth" });
   }, []);
 
   // Step validation functions
@@ -106,7 +106,7 @@ ${
 
           // Now call the business analysis API to get intelligent insights
           try {
-            const analysisResponse = await fetch("/api/analyze-business", {
+            const analysisResponse = await fetch("/api/analyse-business", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

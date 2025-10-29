@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calculator } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
   QuoteFormData,
   PaintingCalculation,
   PAINTING_CONSTANTS,
+  getPaintCategoryKey,
 } from "./types";
+import { usePaintPrices } from "@/hooks/usePaintPrices";
+import { ClientQuoteCard } from "./client-quote-card";
+import { BusinessBreakdownCard } from "./business-breakdown-card";
+import { ExampleInvoice } from "./example-invoice";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface QuoteResultProps {
   formData: QuoteFormData;
@@ -17,7 +20,12 @@ interface QuoteResultProps {
 
 export function QuoteResult({ formData, onBackToForm }: QuoteResultProps) {
   const { paintingDetails } = formData;
-  const { dimensions, paintQuality, numberOfCoats } = paintingDetails;
+  const { dimensions, paintQuality, numberOfCoats, scope } = paintingDetails;
+
+  const { paintData, getPriceByCategory } = usePaintPrices();
+  const [calculation, setCalculation] = useState<PaintingCalculation | null>(
+    null
+  );
 
   // Calculate areas
   const wallArea =
@@ -29,232 +37,167 @@ export function QuoteResult({ formData, onBackToForm }: QuoteResultProps) {
   const totalPaintLitres = Math.ceil(
     (totalArea / PAINTING_CONSTANTS.COVERAGE_RATE) * numberOfCoats
   );
-  const totalPaintCost = totalPaintLitres * paintQuality.pricePerLitre;
 
-  // Calculate labour
-  const wallLabourHours = wallArea / PAINTING_CONSTANTS.WALL_SPEED;
-  const ceilingLabourHours = ceilingArea / PAINTING_CONSTANTS.CEILING_SPEED;
-  const totalLabourHours = wallLabourHours + ceilingLabourHours;
-  const totalLabourCost = totalLabourHours * PAINTING_CONSTANTS.LABOUR_RATE;
+  // Update calculation when paint prices change
+  useEffect(() => {
+    if (paintData) {
+      const categoryKey = getPaintCategoryKey(scope, paintQuality.quality);
+      const realTimePrice = getPriceByCategory(categoryKey);
 
-  // Calculate totals
-  const ancillaryMaterialsCost = PAINTING_CONSTANTS.ANCILLARY_MATERIALS;
-  const materialsSubtotal = totalPaintCost + ancillaryMaterialsCost;
-  const labourSubtotal = totalLabourCost;
-  const grandTotal = materialsSubtotal + labourSubtotal;
+      // Use real-time price if available, otherwise fall back to default
+      const pricePerLitre =
+        realTimePrice > 0 ? realTimePrice : paintQuality.pricePerLitre;
+      const totalPaintCost = totalPaintLitres * pricePerLitre;
 
-  const calculation: PaintingCalculation = {
+      // Calculate labour
+      const wallLabourHours = wallArea / PAINTING_CONSTANTS.WALL_SPEED;
+      const ceilingLabourHours = ceilingArea / PAINTING_CONSTANTS.CEILING_SPEED;
+      const totalLabourHours = wallLabourHours + ceilingLabourHours;
+      const totalLabourCost = totalLabourHours * PAINTING_CONSTANTS.LABOUR_RATE;
+
+      // Calculate totals
+      const ancillaryMaterialsCost = PAINTING_CONSTANTS.ANCILLARY_MATERIALS;
+      const materialsSubtotal = totalPaintCost + ancillaryMaterialsCost;
+      const labourSubtotal = totalLabourCost;
+      const grandTotal = materialsSubtotal + labourSubtotal;
+      const gstAmount = grandTotal * 0.1; // 10% GST
+      const totalIncludingGst = grandTotal + gstAmount;
+
+      // Get relevant paint products for this category
+      const relevantProducts = paintData.products
+        .filter((p) => p.category === categoryKey)
+        .slice(0, 3) // Show top 3 products
+        .map((p) => ({
+          name: p.name,
+          price: p.price,
+          brand: p.brand,
+          category: p.category,
+        }));
+
+      const newCalculation: PaintingCalculation = {
+        wallArea,
+        ceilingArea,
+        totalArea,
+        totalPaintLitres,
+        totalPaintCost,
+        ancillaryMaterialsCost,
+        materialsSubtotal,
+        totalLabourHours,
+        totalLabourCost,
+        labourSubtotal,
+        grandTotal,
+        gstAmount,
+        totalIncludingGst,
+        priceData: {
+          isRealTime: realTimePrice > 0,
+          source: "Bunnings Warehouse",
+          lastUpdated: paintData.lastUpdated || new Date().toISOString(),
+          paintProducts: relevantProducts,
+        },
+      };
+
+      setCalculation(newCalculation);
+    } else {
+      // Fallback calculation with default prices
+      const totalPaintCost = totalPaintLitres * paintQuality.pricePerLitre;
+      const wallLabourHours = wallArea / PAINTING_CONSTANTS.WALL_SPEED;
+      const ceilingLabourHours = ceilingArea / PAINTING_CONSTANTS.CEILING_SPEED;
+      const totalLabourHours = wallLabourHours + ceilingLabourHours;
+      const totalLabourCost = totalLabourHours * PAINTING_CONSTANTS.LABOUR_RATE;
+      const ancillaryMaterialsCost = PAINTING_CONSTANTS.ANCILLARY_MATERIALS;
+      const materialsSubtotal = totalPaintCost + ancillaryMaterialsCost;
+      const labourSubtotal = totalLabourCost;
+      const grandTotal = materialsSubtotal + labourSubtotal;
+      const gstAmount = grandTotal * 0.1; // 10% GST
+      const totalIncludingGst = grandTotal + gstAmount;
+
+      setCalculation({
+        wallArea,
+        ceilingArea,
+        totalArea,
+        totalPaintLitres,
+        totalPaintCost,
+        ancillaryMaterialsCost,
+        materialsSubtotal,
+        totalLabourHours,
+        totalLabourCost,
+        labourSubtotal,
+        grandTotal,
+        gstAmount,
+        totalIncludingGst,
+        priceData: {
+          isRealTime: false,
+          source: "Default Pricing",
+          lastUpdated: new Date().toISOString(),
+        },
+      });
+    }
+  }, [
+    paintData,
+    scope,
+    paintQuality.quality,
+    paintQuality.pricePerLitre,
+    totalPaintLitres,
     wallArea,
     ceilingArea,
     totalArea,
-    totalPaintLitres,
-    totalPaintCost,
-    ancillaryMaterialsCost,
-    materialsSubtotal,
-    totalLabourHours,
-    totalLabourCost,
-    labourSubtotal,
-    grandTotal,
-  };
+    getPriceByCategory,
+  ]);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-AU", {
-      style: "currency",
-      currency: "AUD",
-    }).format(amount);
-  };
-
-  const formatHours = (hours: number) => {
-    return hours.toFixed(1);
-  };
-
-  const getQualityLabel = (quality: string) => {
-    switch (quality) {
-      case "good":
-        return "Good Quality";
-      case "better":
-        return "Better Quality";
-      case "best":
-        return "Best Quality";
-      default:
-        return quality;
-    }
-  };
+  if (!calculation) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading paint prices...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <Calculator className="h-6 w-6" />
-                Painting Cost Estimate
-              </CardTitle>
-              <p className="text-muted-foreground mt-2">
-                Professional cost breakdown for your {paintingDetails.scope}{" "}
-                painting project
-              </p>
-            </div>
-            <Button variant="outline" onClick={onBackToForm} className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Form
-            </Button>
-          </div>
-        </CardHeader>
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      {/* Business Input Explanation */}
+      <div className="bg-gray-50 border rounded-lg p-4">
+        <h3 className="text-lg font-semibold mb-2">For Business Use</h3>
+        <p className="text-sm text-gray-600">
+          This calculator generates both client quotes and detailed business
+          breakdowns. Businesses can customise pricing, margins, and rates in
+          the configuration. The system pulls live paint prices from Bunnings
+          and calculates accurate material/labour costs.
+        </p>
+      </div>
 
-        <CardContent className="space-y-6">
-          {/* Job Title */}
-          <div className="text-center p-4 bg-muted rounded-lg">
-            <h3 className="text-lg font-semibold">
-              Job Title: Painting a {paintingDetails.roomType} of{" "}
-              {dimensions.length}m × {dimensions.width}m × {dimensions.height}m
-            </h3>
-          </div>
+      {/* Tabbed Cards */}
+      <Tabs defaultValue="client-quote" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="client-quote">Client Quote</TabsTrigger>
+          <TabsTrigger value="business-breakdown">
+            Business Breakdown
+          </TabsTrigger>
+          <TabsTrigger value="example-invoice">Example Invoice</TabsTrigger>
+        </TabsList>
 
-          {/* Cost Breakdown Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-border">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="border border-border p-3 text-left font-medium">
-                    Metric
-                  </th>
-                  <th className="border border-border p-3 text-left font-medium">
-                    Calculation / Rate
-                  </th>
-                  <th className="border border-border p-3 text-right font-medium">
-                    Cost / Hours
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Material Costs */}
-                <tr>
-                  <td
-                    className="border border-border p-3 font-medium"
-                    colSpan={3}
-                  >
-                    Material Costs
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border p-3">
-                    Total Paint Required
-                  </td>
-                  <td className="border border-border p-3">
-                    {calculation.totalPaintLitres} Litres @{" "}
-                    {getQualityLabel(paintQuality.quality)} ($
-                    {paintQuality.pricePerLitre}/L)
-                  </td>
-                  <td className="border border-border p-3 text-right font-medium">
-                    {formatCurrency(calculation.totalPaintCost)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border p-3">
-                    Ancillary Materials
-                  </td>
-                  <td className="border border-border p-3">
-                    Fixed Fee (rollers, brushes, tape, drop sheets, fillers)
-                  </td>
-                  <td className="border border-border p-3 text-right font-medium">
-                    {formatCurrency(calculation.ancillaryMaterialsCost)}
-                  </td>
-                </tr>
-                <tr className="bg-muted">
-                  <td className="border border-border p-3 font-medium">
-                    Subtotal Materials
-                  </td>
-                  <td className="border border-border p-3"></td>
-                  <td className="border border-border p-3 text-right font-medium">
-                    {formatCurrency(calculation.materialsSubtotal)}
-                  </td>
-                </tr>
+        <TabsContent value="client-quote" className="mt-6">
+          <ClientQuoteCard
+            formData={formData}
+            calculation={calculation}
+            onBackToForm={onBackToForm}
+          />
+        </TabsContent>
 
-                {/* Labour Costs */}
-                <tr>
-                  <td
-                    className="border border-border p-3 font-medium"
-                    colSpan={3}
-                  >
-                    Labour Costs
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-border p-3">
-                    Total Area Painted
-                  </td>
-                  <td className="border border-border p-3">
-                    {calculation.totalArea.toFixed(1)} m²
-                  </td>
-                  <td className="border border-border p-3"></td>
-                </tr>
-                <tr>
-                  <td className="border border-border p-3">
-                    Estimated Labour Time
-                  </td>
-                  <td className="border border-border p-3">
-                    {formatHours(calculation.totalLabourHours)} Hours @ $
-                    {PAINTING_CONSTANTS.LABOUR_RATE}/hr
-                  </td>
-                  <td className="border border-border p-3 text-right font-medium">
-                    {formatCurrency(calculation.totalLabourCost)}
-                  </td>
-                </tr>
-                <tr className="bg-muted">
-                  <td className="border border-border p-3 font-medium">
-                    Subtotal Labour
-                  </td>
-                  <td className="border border-border p-3"></td>
-                  <td className="border border-border p-3 text-right font-medium">
-                    {formatCurrency(calculation.labourSubtotal)}
-                  </td>
-                </tr>
+        <TabsContent value="business-breakdown" className="mt-6">
+          <BusinessBreakdownCard
+            formData={formData}
+            calculation={calculation}
+            onBackToForm={onBackToForm}
+          />
+        </TabsContent>
 
-                {/* Grand Total */}
-                <tr className="bg-primary text-primary-foreground">
-                  <td className="border border-border p-3 font-bold text-lg">
-                    GRAND TOTAL (Estimate)
-                  </td>
-                  <td className="border border-border p-3"></td>
-                  <td className="border border-border p-3 text-right font-bold text-lg">
-                    {formatCurrency(calculation.grandTotal)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Additional Information */}
-          <div className="p-4 bg-muted rounded-lg">
-            <h4 className="font-medium mb-2">Estimate Details:</h4>
-            <div className="text-sm space-y-1">
-              <p>
-                • Coverage Rate: {PAINTING_CONSTANTS.COVERAGE_RATE} m² per litre
-                ({numberOfCoats} coats)
-              </p>
-              <p>• Labour Rate: ${PAINTING_CONSTANTS.LABOUR_RATE} per hour</p>
-              <p>• Wall Speed: {PAINTING_CONSTANTS.WALL_SPEED} m² per hour</p>
-              <p>
-                • Ceiling Speed: {PAINTING_CONSTANTS.CEILING_SPEED} m² per hour
-              </p>
-              <p>
-                • This is a preliminary estimate based on internal, hardcoded
-                pricing and standard coverage rates.
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-4 pt-4">
-            <Button variant="outline" onClick={onBackToForm}>
-              Modify Estimate
-            </Button>
-            <Button>Save Estimate</Button>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="example-invoice" className="mt-6">
+          <ExampleInvoice formData={formData} calculation={calculation} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

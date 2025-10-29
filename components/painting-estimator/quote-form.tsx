@@ -10,18 +10,30 @@ import {
   PaintingDetails,
   RoomDimensions,
   PaintQuality,
+  ContactDetails,
 } from "./types";
 import { StepOne } from "./step-one";
 import { StepTwo } from "./step-two";
 import { StepThree } from "./step-three";
+import { ContactDetailsStep } from "./step-contact";
+import { ImageUpload } from "./image-upload";
 import { QuoteResult } from "./quote-result";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 export function QuoteForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showQuote, setShowQuote] = useState(false);
   const [formData, setFormData] = useState<QuoteFormData>({
+    contactDetails: {
+      clientName: "",
+      email: "",
+      phone: "",
+      address: "",
+      suburb: "",
+      state: "",
+      postcode: "",
+    },
     paintingDetails: {
       scope: "interior",
       roomType: "",
@@ -36,6 +48,7 @@ export function QuoteForm() {
       },
       numberOfCoats: 2,
     },
+    images: [],
   });
 
   const updatePaintingDetails = (data: Partial<PaintingDetails>) => {
@@ -65,16 +78,40 @@ export function QuoteForm() {
     }));
   };
 
+  const updateContactDetails = (data: Partial<ContactDetails>) => {
+    setFormData((prev) => ({
+      ...prev,
+      contactDetails: { ...prev.contactDetails, ...data },
+    }));
+  };
+
+  const updateImages = (images: File[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      images,
+    }));
+  };
+
   const validateStep = (step: number): boolean => {
-    const { paintingDetails } = formData;
+    const { contactDetails, paintingDetails } = formData;
 
     switch (step) {
       case 1:
-        return !!(paintingDetails.scope && paintingDetails.roomType);
+        return !!(
+          contactDetails.clientName &&
+          contactDetails.email &&
+          contactDetails.phone &&
+          contactDetails.address &&
+          contactDetails.suburb &&
+          contactDetails.state &&
+          contactDetails.postcode
+        );
       case 2:
+        return !!(paintingDetails.scope && paintingDetails.roomType);
+      case 3:
         const { length, width, height } = paintingDetails.dimensions;
         return !!(length > 0 && width > 0 && height > 0);
-      case 3:
+      case 4:
         return !!(
           paintingDetails.paintQuality.quality &&
           paintingDetails.numberOfCoats > 0
@@ -113,28 +150,59 @@ export function QuoteForm() {
     switch (currentStep) {
       case 1:
         return (
-          <StepOne
-            data={formData.paintingDetails}
-            onDataChange={updatePaintingDetails}
-          />
+          <div className="space-y-6">
+            <ContactDetailsStep
+              data={formData.contactDetails}
+              onDataChange={updateContactDetails}
+            />
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={updateImages}
+            />
+          </div>
         );
       case 2:
         return (
-          <StepTwo
-            data={formData.paintingDetails.dimensions}
-            onDataChange={updateDimensions}
-          />
+          <div className="space-y-6">
+            <StepOne
+              data={formData.paintingDetails}
+              onDataChange={updatePaintingDetails}
+            />
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={updateImages}
+            />
+          </div>
         );
       case 3:
         return (
-          <StepThree
-            paintQuality={formData.paintingDetails.paintQuality}
-            numberOfCoats={formData.paintingDetails.numberOfCoats}
-            onPaintQualityChange={updatePaintQuality}
-            onNumberOfCoatsChange={(coats) =>
-              updatePaintingDetails({ numberOfCoats: coats })
-            }
-          />
+          <div className="space-y-6">
+            <StepTwo
+              data={formData.paintingDetails.dimensions}
+              onDataChange={updateDimensions}
+            />
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={updateImages}
+            />
+          </div>
+        );
+      case 4:
+        return (
+          <div className="space-y-6">
+            <StepThree
+              paintQuality={formData.paintingDetails.paintQuality}
+              numberOfCoats={formData.paintingDetails.numberOfCoats}
+              onPaintQualityChange={updatePaintQuality}
+              onNumberOfCoatsChange={(coats) =>
+                updatePaintingDetails({ numberOfCoats: coats })
+              }
+            />
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={updateImages}
+            />
+          </div>
         );
       default:
         return null;

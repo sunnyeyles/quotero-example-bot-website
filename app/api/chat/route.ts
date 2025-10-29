@@ -42,7 +42,13 @@ export async function POST(req: NextRequest) {
     });
 
     // Return the streamed response
-    return result.toTextStreamResponse();
+    return result.toTextStreamResponse({
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
     console.error("AI chat API error:", error);
 
