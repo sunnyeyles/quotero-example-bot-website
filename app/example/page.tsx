@@ -271,7 +271,7 @@ export default function InvoiceHistoryExamplePage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Estimated Cost:</span>
-                      <span className="text-green-600 font-semibold">
+                      <span className="text-primary font-semibold">
                         $450 - $650
                       </span>
                     </div>
@@ -304,7 +304,7 @@ export default function InvoiceHistoryExamplePage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="text-center p-4 border rounded-lg">
-                <Badge className="bg-emerald-600 text-emerald-50 border-emerald-700/40 mb-2">
+                <Badge className="bg-success text-success-foreground border-success/40 mb-2">
                   Paid
                 </Badge>
                 <p className="text-sm text-muted-foreground">
@@ -394,7 +394,7 @@ export default function InvoiceHistoryExamplePage() {
                 <div className="space-y-2">
                   <Progress value={82}>
                     <ProgressLabel>Monthly Revenue Target</ProgressLabel>
-                    <ProgressTrack className="bg-blue-100 h-3">
+                    <ProgressTrack className="bg-primary/20 h-3">
                       <ProgressIndicator className="bg-linear-to-r from-blue-500 to-blue-600" />
                     </ProgressTrack>
                     <ProgressValue />
@@ -404,7 +404,7 @@ export default function InvoiceHistoryExamplePage() {
                 <div className="space-y-2">
                   <Progress value={95}>
                     <ProgressLabel>Customer Satisfaction</ProgressLabel>
-                    <ProgressTrack className="bg-green-100 h-4">
+                    <ProgressTrack className="bg-primary/20 h-4">
                       <ProgressIndicator className="bg-linear-to-r from-green-500 to-green-600" />
                     </ProgressTrack>
                     <ProgressValue />
@@ -488,7 +488,7 @@ export default function InvoiceHistoryExamplePage() {
           <h2 className="text-2xl font-semibold">Custom Styling</h2>
           <InvoiceHistory
             invoices={sampleInvoices.slice(0, 3)}
-            className="border-2 border-blue-200 bg-blue-50/50"
+            className="border-2 border-border bg-accent/50"
             title="Custom Styled History"
             description="Example with custom styling applied."
           />

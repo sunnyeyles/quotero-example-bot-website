@@ -36,9 +36,12 @@ export default function Home() {
       <section className="relative py-12 sm:py-16 md:py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
-              Custom AI Workers
-              <span className="block sm:inline"> for Your Business</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
+              Automation Solutions
+              <span className="block sm:inline">
+                {" "}
+                Custom Fitted to your Business
+              </span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto px-4 sm:px-0">
               We create intelligent AI assistants tailored to your business
@@ -48,10 +51,18 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="outline" className="w-full sm:w-auto">
-              Example Employees
+            <Button
+              variant="default"
+              className="w-full sm:w-auto text-lg"
+              onClick={() => router.push("/bots/train-your-own")}
+            >
+              Create AI Chatbot
             </Button>
-            <Button variant="outline" className="w-full sm:w-auto">
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto text-lg"
+              onClick={() => router.push("/bots")}
+            >
               See Examples
             </Button>
           </div>
@@ -63,7 +74,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
-              Create a Simple Chatbot
+              Create your own AI chatbot
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground">
               Start by defining your bot&apos;s identity and personality
@@ -78,7 +89,8 @@ export default function Home() {
                 onClick={handleStep1Submit}
                 disabled={!isStep1Valid}
                 size="lg"
-                className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto"
+                variant="outline"
+                className="w-full sm:w-auto"
               >
                 Continue to Training
               </Button>

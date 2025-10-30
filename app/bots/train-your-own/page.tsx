@@ -16,18 +16,16 @@ import {
   Check,
 } from "lucide-react";
 import { useTrainYourOwnBot } from "@/hooks/useTrainYourOwnBot";
-import { StepBreadcrumb } from "@/components/step-breadcrumb";
+import Stepper, { Step } from "@/components/ui/form-stepper";
 
 export default function TrainYourOwnBot() {
   const {
     // State
-    currentStep,
     botData,
     manualTrainingData,
     messages,
     inputMessage,
     isLoading,
-    isScraping,
     error,
     isCopied,
     messagesEndRef,
@@ -39,15 +37,12 @@ export default function TrainYourOwnBot() {
     setMessages,
 
     // Functions
-    nextStep,
-    prevStep,
-    canProceedToNext,
     handleFileUpload,
     removeFile,
-    saveBotData,
     sendMessage,
     handleKeyPress,
     shareConversation,
+    scrapeWebsiteIfProvided,
   } = useTrainYourOwnBot();
 
   return (
@@ -57,84 +52,55 @@ export default function TrainYourOwnBot() {
           Train Your Own Bot
         </h1>
         <p className="text-sm sm:text-base">
-          Create a custom AI assistant for your Australian small business
+          We create intelligent AI assistants tailored to your business needs.
+          Our custom bots handle customer inquiries, streamline operations, and
+          boost productivity so you can focus on growing your business.
         </p>
       </div>
 
-      {/* Step Breadcrumbs */}
-      <div className="mb-4 sm:mb-6">
-        <StepBreadcrumb
-          currentStep={currentStep}
-          onStepClick={(step) => {
-            // Navigate to the clicked step if it's accessible
-            if (step <= currentStep) {
-              // You can implement step navigation logic here
-              // For now, we'll just scroll to the step
-              const stepElement = document.getElementById(`step-${step}`);
-              if (stepElement) {
-                stepElement.scrollIntoView({ behaviour: "smooth" });
-              }
-            }
-          }}
-          itemsToDisplay={3}
-        />
-      </div>
-
-      {/* Step Content */}
-      <Card className="p-4 sm:p-6 mb-6 sm:mb-8">
-        {/* Step 1: Bot Identity & Appearance */}
-        {currentStep === 1 && (
-          <div id="step-1" className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">
-                Bot Identity & Appearance
+      <Stepper
+        initialStep={1}
+        onStepChange={async (step) => {
+          // When moving from step 1 to 2, submit Website URL (scrape + analyze)
+          if (step === 2 && botData.websiteUrl?.trim()) {
+            await scrapeWebsiteIfProvided();
+          }
+        }}
+        onFinalStepCompleted={() => {
+          // Optional: handle completion
+        }}
+        stepNames={["Bot Identity & Content Feed", "Preview", "Test Bot"]}
+        showFinalStepButtons={false}
+      >
+        <Step>
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2">
+                Bot Identity & Content Feed
               </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Bot Name *
-                  </label>
-                  <Input
-                    value={botData.name}
-                    onChange={(e) =>
-                      setBotData((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    placeholder="e.g., Sarah"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Personality *
-                  </label>
-                  <Textarea
-                    value={botData.personality}
-                    onChange={(e) =>
-                      setBotData((prev) => ({
-                        ...prev,
-                        personality: e.target.value,
-                      }))
-                    }
-                    placeholder="Friendly, professional..."
-                    className="min-h-[120px]"
-                  />
-                </div>
-              </div>
+              <p className="text-muted-foreground">
+                Define your bot&apos;s personality and provide knowledge sources
+              </p>
             </div>
-          </div>
-        )}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Personality traits *
+                </label>
+                <Textarea
+                  value={botData.personality}
+                  onChange={(e) =>
+                    setBotData((prev) => ({
+                      ...prev,
+                      personality: e.target.value,
+                    }))
+                  }
+                  placeholder="Friendly, professional, knowledgeable, concise..."
+                  className="min-h-[120px]"
+                />
+              </div>
 
-        {/* Step 2: Content & Knowledge Feed */}
-        {currentStep === 2 && (
-          <div id="step-2" className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">
-                Content & Knowledge Feed
-              </h2>
-
-              <div className="space-y-6">
+              <div className="pt-2 space-y-6">
                 <div>
                   <label className="block text-sm font-medium mb-3">
                     Website URL
@@ -231,222 +197,170 @@ export default function TrainYourOwnBot() {
               </div>
             </div>
           </div>
-        )}
+        </Step>
 
-        {/* Step 3: Preview Training Data */}
-        {currentStep === 3 && (
-          <div id="step-3" className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">
-                Preview Training Data
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Review and edit your bot&apos;s training data before testing.
-                You can modify the content below to fine-tune your bot&apos;s
-                knowledge.
+        <Step>
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2">Preview Training Data</h2>
+              <p className="text-muted-foreground">
+                Review and edit your bot&apos;s training data before testing
               </p>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-3">
-                  Training Data (Editable)
-                </label>
-                <Textarea
-                  value={botData.trainingData}
-                  onChange={(e) =>
-                    setBotData((prev) => ({
-                      ...prev,
-                      trainingData: e.target.value,
-                    }))
-                  }
-                  placeholder="Your combined training data will appear here automatically"
-                  className="min-h-[400px]"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-3">
+                Training Data (Editable)
+              </label>
+              <Textarea
+                value={botData.trainingData}
+                onChange={(e) =>
+                  setBotData((prev) => ({
+                    ...prev,
+                    trainingData: e.target.value,
+                  }))
+                }
+                placeholder="Your combined training data will appear here automatically"
+                className="min-h-[400px]"
+              />
             </div>
           </div>
-        )}
+        </Step>
 
-        {/* Step 4: Test Your Bot */}
-        {currentStep === 4 && (
-          <div id="step-4" className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Test Your Bot</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Try out your bot and see how it responds to different questions.
-                You can share your bot or launch it when you&apos;re satisfied.
+        <Step>
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2">Test Your Bot</h2>
+              <p className="text-muted-foreground">
+                Try out your bot and see how it responds to different questions
               </p>
+            </div>
 
-              <div className="max-w-2xl mx-auto">
-                <div>
-                  <label className="block text-sm font-medium mb-3">
-                    Chat with Your Bot
-                  </label>
-                  <Card className="p-4 h-[400px] flex flex-col">
-                    {error && (
-                      <div className="mb-4 p-3 rounded border text-sm">
-                        {error}
+            <div className="max-w-2xl mx-auto">
+              <div>
+                <label className="block text-sm font-medium mb-3">
+                  Chat with Your Bot
+                </label>
+                <Card className="p-4 h-[400px] flex flex-col">
+                  {error && (
+                    <div className="mb-4 p-3 rounded border text-sm">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+                    {messages.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Bot className="w-8 h-8 mx-auto mb-2" />
+                        <p className="text-sm">
+                          Start a conversation with your bot!
+                        </p>
                       </div>
-                    )}
-
-                    <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-                      {messages.length === 0 ? (
-                        <div className="text-center py-8">
-                          <Bot className="w-8 h-8 mx-auto mb-2" />
-                          <p className="text-sm">
-                            Start a conversation with your bot!
-                          </p>
-                        </div>
-                      ) : (
-                        messages.map((message) => (
+                    ) : (
+                      messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${
+                            message.role === "user"
+                              ? "justify-end"
+                              : "justify-start"
+                          }`}
+                        >
                           <div
-                            key={message.id}
-                            className={`flex ${
+                            className={`max-w-[80%] rounded-lg p-2 text-xs ${
                               message.role === "user"
-                                ? "justify-end"
-                                : "justify-start"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
                             }`}
                           >
-                            <div
-                              className={`max-w-[80%] rounded-lg p-2 text-xs ${
-                                message.role === "user"
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted"
-                              }`}
-                            >
-                              <div className="flex items-start space-x-2">
-                                {message.role === "assistant" && (
-                                  <Bot className="w-3 h-3 mt-0.5 shrink-0" />
-                                )}
-                                {message.role === "user" && (
-                                  <User className="w-3 h-3 mt-0.5 shrink-0" />
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs wrap-break-word">
-                                    {message.content}
-                                  </p>
-                                </div>
+                            <div className="flex items-start space-x-2">
+                              {message.role === "assistant" && (
+                                <Bot className="w-3 h-3 mt-0.5 shrink-0" />
+                              )}
+                              {message.role === "user" && (
+                                <User className="w-3 h-3 mt-0.5 shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs wrap-break-word">
+                                  {message.content}
+                                </p>
                               </div>
                             </div>
                           </div>
-                        ))
-                      )}
-                      {isLoading && (
-                        <div className="flex justify-start">
-                          <div className="rounded-lg p-2 flex items-center space-x-2">
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            <span className="text-xs">Bot is thinking...</span>
-                          </div>
                         </div>
-                      )}
-                      <div ref={messagesEndRef} />
-                    </div>
+                      ))
+                    )}
+                    {isLoading && (
+                      <div className="flex justify-start">
+                        <div className="rounded-lg p-2 flex items-center space-x-2">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <span className="text-xs">Bot is thinking...</span>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
 
-                    <div className="flex space-x-2">
-                      <Input
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyDown={(e) =>
-                          handleKeyPress(
-                            e as unknown as React.KeyboardEvent<HTMLTextAreaElement>
-                          )
-                        }
-                        placeholder="Type your message..."
-                        disabled={isLoading}
-                        className="text-xs flex-1"
-                      />
-                      <Button
-                        onClick={sendMessage}
-                        disabled={isLoading || !inputMessage.trim()}
-                        size="sm"
-                      >
-                        <Send className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-6 border-t">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                  <div className="flex space-x-2">
+                    <Input
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyDown={(e) =>
+                        handleKeyPress(
+                          e as unknown as React.KeyboardEvent<HTMLTextAreaElement>
+                        )
+                      }
+                      placeholder="Type your message..."
+                      disabled={isLoading}
+                      className="text-xs flex-1"
+                    />
                     <Button
-                      variant="outline"
-                      onClick={shareConversation}
-                      disabled={messages.length === 0 || !botData.name}
-                      className="w-full sm:w-auto"
+                      onClick={sendMessage}
+                      disabled={isLoading || !inputMessage.trim()}
+                      size="sm"
                     >
-                      {isCopied ? (
-                        <>
-                          <Check className="w-4 h-4 mr-2" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Share2 className="w-4 h-4 mr-2" />
-                          Share Your Bot
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setMessages([])}
-                      disabled={messages.length === 0}
-                      className="w-full sm:w-auto"
-                    >
-                      Clear Conversation
+                      <Send className="w-3 h-3" />
                     </Button>
                   </div>
+                </Card>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button
-                    onClick={saveBotData}
-                    disabled={!botData.name || !botData.personality}
+                    variant="outline"
+                    onClick={shareConversation}
+                    disabled={messages.length === 0}
                     className="w-full sm:w-auto"
                   >
-                    Launch Bot
+                    {isCopied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share Your Bot
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setMessages([])}
+                    disabled={messages.length === 0}
+                    className="w-full sm:w-auto"
+                  >
+                    Clear Conversation
                   </Button>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </Card>
-
-      {/* Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <Button
-          variant="outline"
-          onClick={prevStep}
-          disabled={currentStep === 1}
-          className="w-full sm:w-auto"
-        >
-          {currentStep === 2
-            ? "Back to Step 1"
-            : currentStep === 3
-            ? "Back to Step 2"
-            : currentStep === 4
-            ? "Back to Step 3"
-            : "Previous"}
-        </Button>
-        <Button
-          onClick={() => nextStep()}
-          disabled={!canProceedToNext() || currentStep === 4 || isScraping}
-          className="w-full sm:w-auto"
-        >
-          {isScraping ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              Scraping Website...
-            </>
-          ) : currentStep === 1 ? (
-            "Next: Content Feed"
-          ) : currentStep === 2 ? (
-            "Next: Preview Training Data"
-          ) : currentStep === 3 ? (
-            "Next: Test Your Bot"
-          ) : (
-            "Complete"
-          )}
-        </Button>
-      </div>
+        </Step>
+      </Stepper>
     </div>
   );
 }

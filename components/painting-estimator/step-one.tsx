@@ -3,8 +3,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Combobox } from "@/components/ui/combobox";
-import { PaintingDetails, ROOM_TYPES } from "./types";
+import { PaintingDetails } from "./types";
 
 interface StepOneProps {
   data: PaintingDetails;
@@ -12,12 +11,8 @@ interface StepOneProps {
 }
 
 export function StepOne({ data, onDataChange }: StepOneProps) {
-  const handleScopeChange = (scope: "interior" | "exterior") => {
+  const handleScopeChange = (scope: "interior" | "exterior" | "both") => {
     onDataChange({ scope });
-  };
-
-  const handleRoomTypeChange = (roomType: string) => {
-    onDataChange({ roomType });
   };
 
   return (
@@ -45,26 +40,13 @@ export function StepOne({ data, onDataChange }: StepOneProps) {
               Exterior Painting
             </Label>
           </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="both" id="both" />
+            <Label htmlFor="both" className="text-base">
+              Both
+            </Label>
+          </div>
         </RadioGroup>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Room Type</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          What type of room or area are you painting?
-        </p>
-
-        <Combobox
-          options={ROOM_TYPES.map((roomType) => ({
-            value: roomType,
-            label: roomType,
-          }))}
-          value={data.roomType}
-          onValueChange={handleRoomTypeChange}
-          placeholder="Select room type"
-          searchPlaceholder="Search room types..."
-          emptyMessage="No room type found."
-        />
       </div>
     </div>
   );

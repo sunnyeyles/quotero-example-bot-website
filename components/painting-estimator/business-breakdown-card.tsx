@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  RefreshCw,
   ExternalLink,
   FileText,
   Clock,
@@ -23,14 +22,15 @@ import {
 interface BusinessBreakdownCardProps {
   formData: QuoteFormData;
   calculation: PaintingCalculation;
-  onBackToForm: () => void;
+  forceEdited?: boolean;
 }
 
 export function BusinessBreakdownCard({
   formData,
   calculation,
-  onBackToForm,
+  forceEdited = false,
 }: BusinessBreakdownCardProps) {
+  const [hasEdited, setHasEdited] = React.useState(!!forceEdited);
   const { contactDetails, paintingDetails, images } = formData;
   const { dimensions, paintQuality, numberOfCoats, scope } = paintingDetails;
 
@@ -70,15 +70,15 @@ export function BusinessBreakdownCard({
     ((calculation.grandTotal - totalCost) / calculation.grandTotal) * 100;
 
   return (
-    <Card>
+    <Card className="-mx-4 sm:mx-0">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-2xl flex items-center gap-2 text-foreground">
-              <FileText className="h-6 w-6" />
+            <CardTitle className="text-xl flex items-center gap-2 text-foreground">
+              <FileText className="h-5 w-5" />
               Business Cost Breakdown
             </CardTitle>
-            <p className="text-blue-700 mt-2">
+            <p className="text-primary mt-2">
               Detailed cost analysis for {contactDetails.clientName}&apos;s
               painting project
             </p>
@@ -88,12 +88,12 @@ export function BusinessBreakdownCard({
 
       <CardContent className="space-y-6">
         {/* Client Information */}
-        <div className="p-4 bg-white rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <User className="h-5 w-5" />
+        <div className="p-4 bg-card rounded-lg border border-border">
+          <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+            <User className="h-4 w-4" />
             Client Information
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
               <p>
                 <strong>Name:</strong> {contactDetails.clientName}
@@ -121,11 +121,11 @@ export function BusinessBreakdownCard({
         </div>
 
         {/* Project Details */}
-        <div className="p-4 bg-white rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-foreground mb-3">
+        <div className="p-4 bg-card rounded-lg border border-border">
+          <h3 className="text-base font-semibold text-foreground mb-2">
             Project Details
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div>
               <p>
                 <strong>Room Type:</strong> {paintingDetails.roomType}
@@ -167,15 +167,15 @@ export function BusinessBreakdownCard({
         </div>
 
         {/* Detailed Cost Breakdown */}
-        <div className="p-4 bg-white rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+        <div className="p-4 bg-card rounded-lg border border-border">
+          <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+            <DollarSign className="h-4 w-4" />
             Detailed Cost Breakdown
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-border">
               <thead>
-                <tr className="bg-blue-100">
+                <tr className="bg-muted">
                   <th className="border border-border p-3 text-left font-medium">
                     Item
                   </th>
@@ -191,7 +191,7 @@ export function BusinessBreakdownCard({
                 {/* Material Costs */}
                 <tr>
                   <td
-                    className="border border-border p-3 font-medium bg-white"
+                    className="border border-border p-3 font-medium bg-card"
                     colSpan={3}
                   >
                     Material Costs
@@ -203,7 +203,7 @@ export function BusinessBreakdownCard({
                     {calculation.totalPaintLitres}L @{" "}
                     {getQualityLabel(paintQuality.quality)}
                     {calculation.priceData?.isRealTime ? (
-                      <span className="text-green-600 font-medium">
+                      <span className="text-primary font-medium">
                         {" "}
                         (Live: $
                         {(
@@ -231,7 +231,7 @@ export function BusinessBreakdownCard({
                     {formatCurrency(calculation.ancillaryMaterialsCost)}
                   </td>
                 </tr>
-                <tr className="bg-white">
+                <tr className="bg-card">
                   <td className="border border-border p-3 font-medium">
                     Subtotal Materials
                   </td>
@@ -244,7 +244,7 @@ export function BusinessBreakdownCard({
                 {/* Labour Costs */}
                 <tr>
                   <td
-                    className="border border-border p-3 font-medium bg-white"
+                    className="border border-border p-3 font-medium bg-card"
                     colSpan={3}
                   >
                     Labour Costs
@@ -277,7 +277,7 @@ export function BusinessBreakdownCard({
                     )}
                   </td>
                 </tr>
-                <tr className="bg-white">
+                <tr className="bg-card">
                   <td className="border border-border p-3 font-medium">
                     Subtotal Labour
                   </td>
@@ -291,7 +291,7 @@ export function BusinessBreakdownCard({
                 </tr>
 
                 {/* Totals */}
-                <tr className="bg-blue-100">
+                <tr className="bg-muted">
                   <td className="border border-border p-3 font-medium">
                     Subtotal (Excl. GST)
                   </td>
@@ -307,12 +307,12 @@ export function BusinessBreakdownCard({
                     {formatCurrency(gstAmount)}
                   </td>
                 </tr>
-                <tr className="bg-blue-200">
-                  <td className="border border-border p-3 font-bold text-lg">
+                <tr className="bg-muted">
+                  <td className="border border-border p-3 font-bold text-base">
                     Total (Incl. GST)
                   </td>
                   <td className="border border-border p-3"></td>
-                  <td className="border border-border p-3 text-right font-bold text-lg">
+                  <td className="border border-border p-3 text-right font-bold text-base">
                     {formatCurrency(totalIncludingGst)}
                   </td>
                 </tr>
@@ -322,26 +322,26 @@ export function BusinessBreakdownCard({
         </div>
 
         {/* Profit Analysis */}
-        <div className="p-4 bg-white rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-foreground mb-3">
+        <div className="p-4 bg-card rounded-lg border border-border">
+          <h3 className="text-base font-semibold text-foreground mb-2">
             Profit Analysis
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="text-center p-3 bg-green-50 rounded border">
-              <p className="font-medium text-green-800">Total Revenue</p>
-              <p className="text-lg font-bold text-green-600">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div className="text-center p-3 bg-primary/10 rounded border">
+              <p className="font-medium text-primary">Total Revenue</p>
+              <p className="text-base font-bold text-primary">
                 {formatCurrency(calculation.grandTotal)}
               </p>
             </div>
-            <div className="text-center p-3 bg-orange-50 rounded border">
-              <p className="font-medium text-orange-800">Total Costs</p>
-              <p className="text-lg font-bold text-orange-600">
+            <div className="text-center p-3 bg-destructive/10 rounded border">
+              <p className="font-medium text-destructive">Total Costs</p>
+              <p className="text-base font-bold text-destructive">
                 {formatCurrency(totalCost)}
               </p>
             </div>
-            <div className="text-center p-3 bg-white rounded border">
+            <div className="text-center p-3 bg-card rounded border">
               <p className="font-medium text-foreground">Profit Margin</p>
-              <p className="text-lg font-bold text-blue-600">
+              <p className="text-base font-bold text-primary">
                 {profitMargin.toFixed(1)}%
               </p>
             </div>
@@ -349,12 +349,12 @@ export function BusinessBreakdownCard({
         </div>
 
         {/* Timeline & Scheduling */}
-        <div className="p-4 bg-white rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Clock className="h-5 w-5" />
+        <div className="p-4 bg-card rounded-lg border border-border">
+          <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+            <Clock className="h-4 w-4" />
             Timeline & Scheduling
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
               <p>
                 <strong>Preparation Time:</strong> 1-2 days
@@ -388,14 +388,14 @@ export function BusinessBreakdownCard({
         {/* Paint Products */}
         {calculation.priceData?.paintProducts &&
           calculation.priceData.paintProducts.length > 0 && (
-            <div className="p-4 bg-white rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                <ExternalLink className="h-5 w-5" />
+            <div className="p-4 bg-card rounded-lg border border-border">
+              <h3 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                <ExternalLink className="h-4 w-4" />
                 Recommended Paint Products (Bunnings)
                 {calculation.priceData?.isRealTime && (
                   <Badge
                     variant="secondary"
-                    className="ml-2 bg-blue-100 text-foreground"
+                    className="ml-2 bg-muted text-foreground"
                   >
                     Live Prices
                   </Badge>
@@ -408,14 +408,16 @@ export function BusinessBreakdownCard({
                     className="flex justify-between items-center p-2 bg-white rounded border"
                   >
                     <div>
-                      <p className="font-medium text-sm">{product.name}</p>
-                      <p className="text-xs text-blue-600">{product.brand}</p>
+                      <p className="font-medium text-xs">{product.name}</p>
+                      <p className="text-[10px] text-primary">
+                        {product.brand}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">
                         {formatCurrency(product.price)}
                       </p>
-                      <p className="text-xs text-blue-600">per 4L</p>
+                      <p className="text-[10px] text-primary">per 4L</p>
                     </div>
                   </div>
                 ))}
@@ -425,12 +427,12 @@ export function BusinessBreakdownCard({
 
         {/* Project Photos */}
         {images.length > 0 && (
-          <div className="p-4 bg-white rounded-lg border border-blue-200">
+          <div className="p-4 bg-card rounded-lg border border-border">
             <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
               <Camera className="h-5 w-5" />
               Project Photos ({images.length})
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gp-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {images.map((image, index) => (
                 <div key={index} className="relative">
                   <Image
@@ -440,7 +442,7 @@ export function BusinessBreakdownCard({
                     height={150}
                     className="rounded border object-cover"
                   />
-                  <p className="text-xs text-blue-600 mt-1 truncate">
+                  <p className="text-xs text-primary mt-1 truncate">
                     {image.name}
                   </p>
                 </div>
@@ -449,13 +451,20 @@ export function BusinessBreakdownCard({
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-4 pt-4">
-          <Button variant="outline" onClick={onBackToForm}>
+        {/* Action Buttons (enabled but no-ops) */}
+        <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 sm:gap-4 pt-4">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => setHasEdited(true)}
+          >
             Edit Details
           </Button>
-          <Button variant="outline">Generate Invoice</Button>
-          <Button variant="outline">Save Quote</Button>
+          <Button className="w-full sm:w-auto" onClick={() => {}}>
+            {hasEdited
+              ? "Send Updated Estimate to Client"
+              : "Send Confirmed Estimate to Client"}
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -1,10 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
   QuoteFormData,
   PersonalDetails,
@@ -25,11 +21,9 @@ import { StepSeven } from "./step-seven";
 import { StepEight } from "./step-eight";
 import { ImageUpload } from "./image-upload";
 import { QuoteResult } from "./quote-result";
-
-const TOTAL_STEPS = 8;
+import Stepper, { Step } from "@/components/ui/form-stepper";
 
 export function QuoteForm() {
-  const [currentStep, setCurrentStep] = useState(1);
   const [showQuote, setShowQuote] = useState(false);
   const [formData, setFormData] = useState<QuoteFormData>({
     personalDetails: {
@@ -101,51 +95,6 @@ export function QuoteForm() {
     }));
   };
 
-  const validateStep = (step: number): boolean => {
-    switch (step) {
-      case 1:
-        const { firstName, lastName, email, phone } = formData.personalDetails;
-        return !!(firstName && lastName && email && phone);
-      case 2:
-        return !!formData.locationDetails.suburb;
-      case 3:
-        return !!formData.installationType.type;
-      case 4:
-        return !!formData.roofDetails.type;
-      case 5:
-        return !!formData.roofDetails.pitch;
-      case 6:
-        return !!(
-          formData.skylightDetails.type && formData.skylightDetails.size
-        );
-      case 7:
-        return true; // Optional step
-      case 8:
-        return !!(
-          formData.propertyDetails.storeys &&
-          formData.propertyDetails.inspectionAvailability
-        );
-      default:
-        return false;
-    }
-  };
-
-  const nextStep = () => {
-    if (currentStep < TOTAL_STEPS && validateStep(currentStep)) {
-      setCurrentStep((prev) => prev + 1);
-    } else if (currentStep === TOTAL_STEPS && validateStep(currentStep)) {
-      setShowQuote(true);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
-    }
-  };
-
-  const progressPercentage = (currentStep / TOTAL_STEPS) * 100;
-
   if (showQuote) {
     return (
       <QuoteResult
@@ -155,149 +104,165 @@ export function QuoteForm() {
     );
   }
 
-  const renderStep = () => {
-    const stepNotes = formData.notes[`step${currentStep}`] || "";
-
-    switch (currentStep) {
-      case 1:
-        return (
+  return (
+    <Stepper
+      initialStep={1}
+      onStepChange={() => {
+        // Optional: handle step changes if needed
+      }}
+      onFinalStepCompleted={() => setShowQuote(true)}
+      stepNames={[
+        "Personal Details",
+        "Location Details",
+        "Installation Type",
+        "Roof Type",
+        "Roof Pitch",
+        "Skylight Details",
+        "Additional Skylights",
+        "Property Details",
+      ]}
+    >
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Personal Details</h2>
+            <p className="text-muted-foreground">
+              Let&apos;s start with your contact information
+            </p>
+          </div>
           <StepOne
             data={formData.personalDetails}
-            notes={stepNotes}
+            notes={formData.notes["step1"] || ""}
             onDataChange={updatePersonalDetails}
             onNotesChange={updateNotes}
           />
-        );
-      case 2:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Location Details</h2>
+            <p className="text-muted-foreground">
+              Where is your property located?
+            </p>
+          </div>
           <StepTwo
             data={formData.locationDetails}
-            notes={stepNotes}
+            notes={formData.notes["step2"] || ""}
             onDataChange={updateLocationDetails}
             onNotesChange={updateNotes}
           />
-        );
-      case 3:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Installation Type</h2>
+            <p className="text-muted-foreground">
+              What type of installation do you need?
+            </p>
+          </div>
           <StepThree
             data={formData.installationType}
-            notes={stepNotes}
+            notes={formData.notes["step3"] || ""}
             onDataChange={updateInstallationType}
             onNotesChange={updateNotes}
           />
-        );
-      case 4:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Roof Type</h2>
+            <p className="text-muted-foreground">
+              What type of roof do you have?
+            </p>
+          </div>
           <StepFour
             data={formData.roofDetails}
-            notes={stepNotes}
+            notes={formData.notes["step4"] || ""}
             onDataChange={updateRoofDetails}
             onNotesChange={updateNotes}
           />
-        );
-      case 5:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Roof Pitch</h2>
+            <p className="text-muted-foreground">What is your roof pitch?</p>
+          </div>
           <StepFive
             data={formData.roofDetails}
-            notes={stepNotes}
+            notes={formData.notes["step5"] || ""}
             onDataChange={updateRoofDetails}
             onNotesChange={updateNotes}
           />
-        );
-      case 6:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Skylight Details</h2>
+            <p className="text-muted-foreground">
+              Choose your skylight specifications
+            </p>
+          </div>
           <StepSix
             data={formData.skylightDetails}
             roofPitch={formData.roofDetails.pitch}
-            notes={stepNotes}
+            notes={formData.notes["step6"] || ""}
             onDataChange={updateSkylightDetails}
             onNotesChange={updateNotes}
           />
-        );
-      case 7:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Additional Skylights</h2>
+            <p className="text-muted-foreground">
+              Add any additional skylights (optional)
+            </p>
+          </div>
           <StepSeven
             data={formData.additionalSkylights}
             roofPitch={formData.roofDetails.pitch}
-            notes={stepNotes}
+            notes={formData.notes["step7"] || ""}
             onDataChange={updateAdditionalSkylights}
             onNotesChange={updateNotes}
           />
-        );
-      case 8:
-        return (
+        </div>
+      </Step>
+
+      <Step>
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Property Details</h2>
+            <p className="text-muted-foreground">
+              Final details about your property
+            </p>
+          </div>
           <StepEight
             data={formData.propertyDetails}
-            notes={stepNotes}
+            notes={formData.notes["step8"] || ""}
             onDataChange={updatePropertyDetails}
             onNotesChange={updateNotes}
           />
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <div className="space-y-4">
-            <div className="text-center">
-              <CardTitle className="text-2xl">
-                Skylight Installation Quote
-              </CardTitle>
-              <p className="text-muted-foreground mt-2">
-                Get a personalized quote for your skylight installation project
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>
-                  Step {currentStep} of {TOTAL_STEPS}
-                </span>
-                <span>{Math.round(progressPercentage)}% Complete</span>
-              </div>
-              <Progress value={progressPercentage} className="h-2" />
-            </div>
+          <div className="mt-6">
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={updateImages}
+            />
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          {renderStep()}
-
-          {currentStep === 8 && (
-            <div className="mt-6">
-              <ImageUpload
-                images={formData.images}
-                onImagesChange={updateImages}
-              />
-            </div>
-          )}
-
-          <div className="flex justify-between pt-6">
-            <Button
-              variant="outline"
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-
-            <Button
-              onClick={nextStep}
-              disabled={!validateStep(currentStep)}
-              className="gap-2"
-            >
-              {currentStep === TOTAL_STEPS ? "Get Quote" : "Next"}
-              {currentStep < TOTAL_STEPS && <ArrowRight className="h-4 w-4" />}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </Step>
+    </Stepper>
   );
 }

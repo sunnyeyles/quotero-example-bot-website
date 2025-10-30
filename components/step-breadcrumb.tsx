@@ -99,7 +99,7 @@ export function StepBreadcrumb({
                           item.step && item.step > currentStep
                             ? "opacity-50 cursor-not-allowed"
                             : "cursor-pointer"
-                        } ${item.completed ? "text-green-600" : ""}`}
+                        } ${item.completed ? "text-primary" : ""}`}
                       >
                         {item.label}
                       </DropdownMenuItem>
@@ -130,7 +130,7 @@ export function StepBreadcrumb({
                             item.step && item.step > currentStep
                               ? "opacity-50 cursor-not-allowed"
                               : "cursor-pointer hover:text-primary"
-                          } ${item.completed ? "text-green-600" : ""}`}
+                          } ${item.completed ? "text-primary" : ""}`}
                         >
                           {item.label}
                         </button>
@@ -155,7 +155,7 @@ export function StepBreadcrumb({
                 <BreadcrumbLink
                   asChild
                   className={`max-w-20 truncate md:max-w-none ${
-                    item.completed ? "text-green-600" : ""
+                    item.completed ? "text-primary" : ""
                   }`}
                 >
                   <button

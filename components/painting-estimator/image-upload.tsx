@@ -3,7 +3,6 @@
 import React, { useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Camera } from "lucide-react";
 
@@ -91,7 +90,7 @@ export function ImageUpload({ images, onImagesChange }: ImageUploadProps) {
         <div className="border border-dashed border-muted-foreground/25 rounded-md p-4 text-center">
           <Camera className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">
-            Upload photos for a more accurate quote
+            upload photos of the room for a more accurate estimate
           </p>
         </div>
       )}

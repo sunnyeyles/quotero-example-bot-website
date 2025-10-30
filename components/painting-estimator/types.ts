@@ -23,11 +23,20 @@ export interface PaintQuality {
 }
 
 export interface PaintingDetails {
-  scope: "interior" | "exterior";
+  scope: "interior" | "exterior" | "both";
   roomType: string;
   dimensions: RoomDimensions;
   paintQuality: PaintQuality;
   numberOfCoats: number;
+}
+
+export interface RoomDetail {
+  roomIndex: number;
+  roomType: string;
+  wallsAreaSqm: number;
+  ceilingAreaSqm: number;
+  includeWalls: boolean;
+  includeCeilings: boolean;
 }
 
 export interface PaintingCalculation {
@@ -61,6 +70,17 @@ export interface QuoteFormData {
   contactDetails: ContactDetails;
   paintingDetails: PaintingDetails;
   images: File[];
+  additionalDetails?: {
+    includeCeilings: boolean;
+    doorsCount?: number;
+    windowsCount?: number;
+    trimsLinearMetres?: number;
+    schedulePreference?: string;
+    notes?: string;
+  };
+  rooms?: RoomDetail[];
+  roomsCount?: number;
+  stepNotes?: Record<string, string>;
 }
 
 export const PAINT_QUALITIES = [

@@ -3,7 +3,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/shadcn-studio/input/input-40";
 import { PaintQuality, PAINT_QUALITIES } from "./types";
 
 interface StepThreeProps {
@@ -29,8 +29,8 @@ export function StepThree({
     }
   };
 
-  const handleCoatsChange = (value: string) => {
-    const coats = parseInt(value) || 2;
+  const handleCoatsChange = (value: number) => {
+    const coats = Number.isFinite(value) ? value : 2;
     onNumberOfCoatsChange(coats);
   };
 
@@ -73,13 +73,12 @@ export function StepThree({
 
         <div className="space-y-2">
           <Label htmlFor="coats">Number of Coats</Label>
-          <Input
+          <NumberInput
             id="coats"
-            type="number"
-            min="1"
-            max="5"
+            minValue={1}
+            maxValue={5}
             value={numberOfCoats}
-            onChange={(e) => handleCoatsChange(e.target.value)}
+            onChange={(v) => handleCoatsChange(v)}
             className="w-32"
           />
         </div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/shadcn-studio/input/input-40";
 import { RoomDimensions } from "./types";
 
 interface StepTwoProps {
@@ -13,9 +13,9 @@ interface StepTwoProps {
 export function StepTwo({ data, onDataChange }: StepTwoProps) {
   const handleDimensionChange = (
     field: keyof RoomDimensions,
-    value: string
+    value: number
   ) => {
-    const numValue = parseFloat(value) || 0;
+    const numValue = typeof value === "number" && !isNaN(value) ? value : 0;
     onDataChange({ ...data, [field]: numValue });
   };
 
@@ -30,40 +30,38 @@ export function StepTwo({ data, onDataChange }: StepTwoProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="length">Length (m)</Label>
-            <Input
+            <NumberInput
               id="length"
-              type="number"
-              step="0.1"
-              min="0"
-              value={data.length || ""}
-              onChange={(e) => handleDimensionChange("length", e.target.value)}
-              placeholder="e.g., 4.5"
+              label={undefined}
+              step={0.1}
+              minValue={0}
+              value={data.length || 0}
+              onChange={(v) => handleDimensionChange("length", v)}
+              inputClassName="text-left"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="width">Width (m)</Label>
-            <Input
+            <NumberInput
               id="width"
-              type="number"
-              step="0.1"
-              min="0"
-              value={data.width || ""}
-              onChange={(e) => handleDimensionChange("width", e.target.value)}
-              placeholder="e.g., 3.2"
+              step={0.1}
+              minValue={0}
+              value={data.width || 0}
+              onChange={(v) => handleDimensionChange("width", v)}
+              inputClassName="text-left"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="height">Height (m)</Label>
-            <Input
+            <NumberInput
               id="height"
-              type="number"
-              step="0.1"
-              min="0"
-              value={data.height || ""}
-              onChange={(e) => handleDimensionChange("height", e.target.value)}
-              placeholder="e.g., 2.7"
+              step={0.1}
+              minValue={0}
+              value={data.height || 0}
+              onChange={(v) => handleDimensionChange("height", v)}
+              inputClassName="text-left"
             />
           </div>
         </div>

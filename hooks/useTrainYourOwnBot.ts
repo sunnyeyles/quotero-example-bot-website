@@ -40,17 +40,17 @@ export function useTrainYourOwnBot() {
 
   // Utility functions
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behaviour: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behaviour: "smooth" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Step validation functions
   const isStep1Valid = useCallback(() => {
-    return botData.name.trim() !== "" && botData.personality.trim() !== "";
-  }, [botData.name, botData.personality]);
+    return botData.personality.trim() !== "";
+  }, [botData.personality]);
 
   const isStep2Valid = useCallback(() => {
     return (
@@ -71,80 +71,77 @@ export function useTrainYourOwnBot() {
   // Navigation functions
   const nextStep = useCallback(async () => {
     if (currentStep < 4) {
-      // If moving from step 2 to step 3, scrape website if URL is provided
-      if (currentStep === 2 && botData.websiteUrl.trim()) {
-        // Inline website scraping logic to avoid circular dependency
-        setIsScraping(true);
-        setError(null);
+      // If moving forward and a URL exists, optionally handled elsewhere
+      setCurrentStep(currentStep + 1);
+    }
+  }, [currentStep, botData.websiteUrl]);
 
-        try {
-          // Use server-side scraping to avoid CORS issues
-          const response = await fetch("/api/scrape-website", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ url: botData.websiteUrl }),
-          });
+  const scrapeWebsiteIfProvided = useCallback(async () => {
+    if (!botData.websiteUrl.trim()) return;
+    setIsScraping(true);
+    setError(null);
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+    try {
+      const response = await fetch("/api/scrape-website", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: botData.websiteUrl }),
+      });
 
-          const scrapedData = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-          if (scrapedData.error) {
-            setError(`Failed to scrape website: ${scrapedData.error}`);
-            return;
-          }
+      const scrapedData = await response.json();
 
-          const websiteContent = `Title: ${scrapedData.title}
+      if (scrapedData.error) {
+        setError(`Failed to scrape website: ${scrapedData.error}`);
+        return;
+      }
+
+      const websiteContent = `Title: ${scrapedData.title}
 Content: ${scrapedData.content}
 ${
   scrapedData.links.length > 0 ? `Links: ${scrapedData.links.join("\n")}` : ""
 }`;
 
-          // Now call the business analysis API to get intelligent insights
-          try {
-            const analysisResponse = await fetch("/api/analyse-business", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ websiteData: websiteContent }),
-            });
+      try {
+        const analysisResponse = await fetch("/api/analyse-business", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ websiteData: websiteContent }),
+        });
 
-            if (analysisResponse.ok) {
-              const analysisData = await analysisResponse.json();
-              if (analysisData.success && analysisData.businessAnalysis) {
-                // Only set website content if we have AI-generated natural language analysis
-                setBotData((prev: BotData) => ({
-                  ...prev,
-                  websiteContent: analysisData.businessAnalysis,
-                }));
-              }
-            }
-          } catch (analysisError) {
-            console.error("Business analysis failed:", analysisError);
-            // Don't set any website content if analysis fails
+        if (analysisResponse.ok) {
+          const analysisData = await analysisResponse.json();
+          if (analysisData.success && analysisData.businessAnalysis) {
             setBotData((prev: BotData) => ({
               ...prev,
-              websiteContent: "",
+              websiteContent: analysisData.businessAnalysis,
             }));
           }
-        } catch (err) {
-          setError(
-            `Error scraping website: ${
-              err instanceof Error ? err.message : "Unknown error"
-            }`
-          );
-        } finally {
-          setIsScraping(false);
         }
+      } catch (analysisError) {
+        console.error("Business analysis failed:", analysisError);
+        setBotData((prev: BotData) => ({
+          ...prev,
+          websiteContent: "",
+        }));
       }
-      setCurrentStep(currentStep + 1);
+    } catch (err) {
+      setError(
+        `Error scraping website: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsScraping(false);
     }
-  }, [currentStep, botData.websiteUrl]);
+  }, [botData.websiteUrl]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 1) {
@@ -347,10 +344,8 @@ ${
 
   // Chat functions
   const sendMessage = useCallback(async () => {
-    if (!inputMessage.trim() || !botData.name || !botData.personality) {
-      setError(
-        "Please provide a message and complete bot configuration (name and personality)"
-      );
+    if (!inputMessage.trim() || !botData.personality) {
+      setError("Please provide a message and set personality traits");
       return;
     }
 
@@ -600,5 +595,6 @@ ${
     handleKeyPress,
     shareConversation,
     scrollToTop,
+    scrapeWebsiteIfProvided,
   };
 }

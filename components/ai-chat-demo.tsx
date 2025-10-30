@@ -72,15 +72,15 @@ export function AIChatDemo() {
                 >
                   <div className="shrink-0">
                     {message.role === "user" ? (
-                      <User className="h-6 w-6 text-blue-600" />
+                      <User className="h-6 w-6 text-primary" />
                     ) : (
-                      <Bot className="h-6 w-6 text-green-600" />
+                      <Bot className="h-6 w-6 text-primary" />
                     )}
                   </div>
                   <div
                     className={`rounded-lg px-3 py-2 ${
                       message.role === "user"
-                        ? "bg-blue-600 text-white"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-muted text-foreground"
                     }`}
                   >
@@ -93,7 +93,7 @@ export function AIChatDemo() {
 
           {isLoading && (
             <div className="flex gap-3 justify-start">
-              <Bot className="h-6 w-6 text-green-600 flex-shrink-0" />
+              <Bot className="h-6 w-6 text-primary flex-shrink-0" />
               <div className="bg-muted rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />

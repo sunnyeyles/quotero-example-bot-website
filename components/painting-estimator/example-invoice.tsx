@@ -27,7 +27,7 @@ export function ExampleInvoice({ formData, calculation }: ExampleInvoiceProps) {
   };
 
   return (
-    <Card>
+    <Card className="-mx-4 sm:mx-0">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
@@ -98,8 +98,8 @@ export function ExampleInvoice({ formData, calculation }: ExampleInvoiceProps) {
         {/* Invoice Items */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Services:</h3>
-          <div className="border rounded-lg overflow-hidden">
-            <table className="w-full">
+          <div className="border rounded-lg overflow-x-auto">
+            <table className="w-full min-w-[560px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left p-3 font-medium">Description</th>
@@ -139,8 +139,8 @@ export function ExampleInvoice({ formData, calculation }: ExampleInvoiceProps) {
         </div>
 
         {/* Totals */}
-        <div className="flex justify-end">
-          <div className="w-64 space-y-2">
+        <div className="flex justify-between sm:justify-end">
+          <div className="w-full sm:w-64 space-y-2">
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span>{formatCurrency(calculation.grandTotal)}</span>
@@ -193,12 +193,12 @@ export function ExampleInvoice({ formData, calculation }: ExampleInvoiceProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4 pt-4">
-          <Button variant="outline">
+        <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 sm:gap-4 pt-4">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Mail className="h-4 w-4 mr-2" />
             Email Invoice
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Download PDF
           </Button>
