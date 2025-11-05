@@ -12,6 +12,10 @@ export interface BotData {
   files: UploadedFile[];
   websiteUrl: string;
   websiteContent: string;
+  style?: {
+    borderRadius: string; // e.g. "0.5rem"
+    font: "inter" | "spaceGrotesk" | "spaceMono" | "jetbrainsMono";
+  };
 }
 
 export interface UploadedFile {

@@ -6,8 +6,8 @@ import {
   Space_Mono,
 } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,13 +50,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} ${spaceMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

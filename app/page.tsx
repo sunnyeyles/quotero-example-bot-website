@@ -1,37 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Step1BotIdentity } from "@/components/train-your-own";
-import { useState } from "react";
-import { BotData } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { GeneratedForm } from "@/components/create-bot/example";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const router = useRouter();
-  const [botData, setBotData] = useState<BotData>({
-    name: "",
-    personality: "",
-    trainingData: "",
-    files: [],
-    websiteUrl: "",
-    websiteContent: "",
-  });
-
-  const handleStep1Submit = () => {
-    if (botData.name.trim() && botData.personality.trim()) {
-      // Store bot data in sessionStorage to persist across navigation
-      sessionStorage.setItem("botData", JSON.stringify(botData));
-      // Navigate to train-your-own page
-      router.push("/bots/train-your-own");
-    }
-  };
-
-  const isStep1Valid =
-    botData.name.trim() !== "" && botData.personality.trim() !== "";
 
   return (
     <div className="min-h-screen">
+      <ThemeToggle />
       {/* Hero Section */}
       <section className="relative py-12 sm:py-16 md:py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,21 +35,14 @@ export default function Home() {
               className="w-full sm:w-auto text-lg"
               onClick={() => router.push("/bots/train-your-own")}
             >
-              Create AI Chatbot
-            </Button>
-            <Button
-              variant="secondary"
-              className="w-full sm:w-auto text-lg"
-              onClick={() => router.push("/bots")}
-            >
-              See Examples
+              Create Your Own AI Chatbot
             </Button>
           </div>
         </div>
       </section>
 
       {/* Bot Identity Section */}
-      <section className="py-12 sm:py-16 bg-muted/30">
+      <section className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
@@ -81,23 +53,11 @@ export default function Home() {
             </p>
           </div>
 
-          <Card className="p-4 sm:p-6 md:p-8">
-            <Step1BotIdentity botData={botData} setBotData={setBotData} />
-
-            <div className="mt-6 sm:mt-8 flex justify-center">
-              <Button
-                onClick={handleStep1Submit}
-                disabled={!isStep1Valid}
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                Continue to Training
-              </Button>
-            </div>
-          </Card>
+          <GeneratedForm />
         </div>
       </section>
+      {/* setup lazy loading for the planet background */}
+      {/* <PlanetBackground /> */}
     </div>
   );
 }

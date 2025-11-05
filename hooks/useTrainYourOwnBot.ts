@@ -12,6 +12,11 @@ import mammoth from "mammoth";
 import LZString from "lz-string";
 import { toast } from "sonner";
 
+const DEFAULT_STYLE = {
+  borderRadius: "0rem",
+  font: "inter" as const,
+};
+
 export function useTrainYourOwnBot() {
   // State management - Initialize with default values to prevent hydration mismatch
   const [currentStep, setCurrentStep] = useState(1);
@@ -22,6 +27,7 @@ export function useTrainYourOwnBot() {
     files: [],
     websiteUrl: "",
     websiteContent: "",
+    style: DEFAULT_STYLE,
   });
 
   const [manualTrainingData, setManualTrainingData] = useState("");
@@ -47,6 +53,17 @@ export function useTrainYourOwnBot() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  // Persist botData to sessionStorage when it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("botData", JSON.stringify(botData));
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }, [botData]);
+
   // Step validation functions
   const isStep1Valid = useCallback(() => {
     return botData.personality.trim() !== "";
@@ -71,10 +88,9 @@ export function useTrainYourOwnBot() {
   // Navigation functions
   const nextStep = useCallback(async () => {
     if (currentStep < 4) {
-      // If moving forward and a URL exists, optionally handled elsewhere
       setCurrentStep(currentStep + 1);
     }
-  }, [currentStep, botData.websiteUrl]);
+  }, [currentStep]);
 
   const scrapeWebsiteIfProvided = useCallback(async () => {
     if (!botData.websiteUrl.trim()) return;
@@ -446,7 +462,13 @@ ${
       if (stored) {
         try {
           const parsedData = JSON.parse(stored);
-          setBotData(parsedData);
+          setBotData({
+            ...parsedData,
+            style: {
+              ...DEFAULT_STYLE,
+              ...(parsedData.style || {}),
+            },
+          });
           // If we have name and personality from homepage, start at step 2
           if (parsedData.name && parsedData.personality) {
             setCurrentStep(2);
@@ -482,6 +504,10 @@ ${
                 files: sharedData.botData.files || [],
                 websiteUrl: sharedData.botData.websiteUrl || "",
                 websiteContent: sharedData.botData.websiteContent || "",
+                style: {
+                  ...DEFAULT_STYLE,
+                  ...((sharedData.botData.style as BotData["style"]) || {}),
+                },
               });
             }
             if (sharedData.messages && Array.isArray(sharedData.messages)) {
