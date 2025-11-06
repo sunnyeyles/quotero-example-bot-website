@@ -87,20 +87,35 @@ export function Step4TestBot({
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasTypedOpeningRef = useRef(false);
+  const animatedMessageIdRef = useRef<string | null>(null);
 
   // Check if this is the opening message (first assistant message, no user messages)
-  const openingMessage = messages.find(
-    (msg) =>
-      msg.role === "assistant" &&
-      messages.filter((m) => m.role === "user").length === 0
-  );
+  const hasUserMessages = messages.some((m) => m.role === "user");
+  const openingMessage = !hasUserMessages
+    ? messages.find((msg) => msg.role === "assistant")
+    : undefined;
 
   useEffect(() => {
-    // Only animate typing for the opening message
+    // Reset when opening message is removed
+    if (!openingMessage) {
+      hasTypedOpeningRef.current = false;
+      animatedMessageIdRef.current = null;
+      setTypingText("");
+      setIsTyping(false);
+      return;
+    }
+
+    // If opening message ID changed, reset to allow new animation
+    if (animatedMessageIdRef.current !== openingMessage.id) {
+      hasTypedOpeningRef.current = false;
+    }
+
+    // Only animate typing for the opening message if we haven't animated it yet
     if (openingMessage && !hasTypedOpeningRef.current) {
       setIsTyping(true);
       setTypingText("");
       hasTypedOpeningRef.current = true;
+      animatedMessageIdRef.current = openingMessage.id;
 
       let currentIndex = 0;
       const fullText = openingMessage.content;
@@ -124,11 +139,6 @@ export function Step4TestBot({
           clearTimeout(typingTimeoutRef.current);
         }
       };
-    } else if (!openingMessage) {
-      // Reset when opening message is removed
-      hasTypedOpeningRef.current = false;
-      setTypingText("");
-      setIsTyping(false);
     }
   }, [openingMessage?.id, openingMessage?.content]);
 
@@ -161,7 +171,7 @@ export function Step4TestBot({
           )}
 
           {/* Messages */}
-          <div className="space-y-4 max-h-96 overflow-y-auto mb-4">
+          <div className="space-y-4 max-h-96 min-h-[300px] overflow-y-auto mb-4">
             {messages.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 <Bot className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
@@ -188,12 +198,18 @@ export function Step4TestBot({
                 const isOpeningMessage =
                   message.role === "assistant" &&
                   message.id === openingMessage?.id;
+                // If typing animation is active and we have text, show typing text
+                // If typing animation finished or never started, show full content
+                // Only show empty if animation is actively running but hasn't produced text yet (within first 300ms)
                 const displayText =
-                  isOpeningMessage && typingText.length > 0
+                  isOpeningMessage && isTyping && typingText.length > 0
                     ? typingText
-                    : isOpeningMessage && typingText.length === 0
-                    ? "" // Don't show anything until typing starts
-                    : message.content;
+                    : isOpeningMessage &&
+                      isTyping &&
+                      typingText.length === 0 &&
+                      hasTypedOpeningRef.current
+                    ? "" // Animation just started, wait for text
+                    : message.content; // Show full content if not animating or animation finished
 
                 return (
                   <div

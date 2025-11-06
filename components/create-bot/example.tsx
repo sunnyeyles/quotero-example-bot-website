@@ -441,102 +441,103 @@ export const GeneratedForm = () => {
           </div>
         ))}
       </div>
-      <Card className="shadow-sm" data-form-card>
+      <Card className="shadow-sm min-h-[600px] flex flex-col" data-form-card>
         <CardHeader>
           <CardTitle className="text-lg">Create Your Bot</CardTitle>
           <CardDescription>
             {stepTitles[step]} - Step {step + 1} of {totalSteps}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {step === 0 && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-              className="grid gap-y-4"
-            >
-              <Step1BotIdentity
-                personality={personality}
-                setPersonality={setPersonality}
-                websiteUrl={websiteUrl}
-                setWebsiteUrl={setWebsiteUrl}
-                files={files}
-                manualTrainingData={manualTrainingData}
-                setManualTrainingData={setManualTrainingData}
-                onFileUpload={handleFileUpload}
-                onRemoveFile={handleRemoveFile}
-                uploadedFiles={uploadedFiles}
-                suggestedQuestions={botData.suggestedQuestions}
-                setSuggestedQuestions={(questions) => {
-                  setBotData((prev: BotData) => ({
-                    ...prev,
-                    suggestedQuestions: questions,
-                  }));
+        <CardContent className="flex-1 flex items-center">
+          <div className="w-full">
+            {step === 0 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
                 }}
-                onScrollToCenter={scrollFormToCenter}
-              />
+                className="grid gap-y-4"
+              >
+                <Step1BotIdentity
+                  personality={personality}
+                  setPersonality={setPersonality}
+                  websiteUrl={websiteUrl}
+                  setWebsiteUrl={setWebsiteUrl}
+                  files={files}
+                  manualTrainingData={manualTrainingData}
+                  setManualTrainingData={setManualTrainingData}
+                  onFileUpload={handleFileUpload}
+                  onRemoveFile={handleRemoveFile}
+                  uploadedFiles={uploadedFiles}
+                  suggestedQuestions={botData.suggestedQuestions}
+                  setSuggestedQuestions={(questions) => {
+                    setBotData((prev: BotData) => ({
+                      ...prev,
+                      suggestedQuestions: questions,
+                    }));
+                  }}
+                  onScrollToCenter={scrollFormToCenter}
+                />
 
-              <div className="flex justify-between pt-4">
-                <Button
-                  type="button"
-                  className="font-medium"
-                  size="sm"
-                  onClick={handleBack}
-                  disabled={true}
-                >
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="font-medium"
-                  disabled={isScraping}
-                >
-                  {isScraping ? "Training bot..." : "Next"}
-                </Button>
-              </div>
-            </form>
-          )}
+                <div className="flex justify-between pt-4">
+                  <Button
+                    type="button"
+                    className="font-medium"
+                    size="sm"
+                    onClick={handleBack}
+                    disabled={true}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="font-medium"
+                    disabled={isScraping}
+                  >
+                    {isScraping ? "Training bot..." : "Next"}
+                  </Button>
+                </div>
+              </form>
+            )}
 
-          {step === 1 && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-              className="grid gap-y-4"
-            >
-              <Step2PreviewTraining
-                trainingData={trainingData}
-                setTrainingData={(value: string) => {
-                  setBotData((prev: BotData) => ({
-                    ...prev,
-                    trainingData: value,
-                  }));
+            {step === 1 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
                 }}
-              />
+                className="grid gap-y-4"
+              >
+                <Step2PreviewTraining
+                  trainingData={trainingData}
+                  setTrainingData={(value: string) => {
+                    setBotData((prev: BotData) => ({
+                      ...prev,
+                      trainingData: value,
+                    }));
+                  }}
+                />
 
-              <div className="flex justify-between pt-4">
-                <Button
-                  type="button"
-                  className="font-medium"
-                  size="sm"
-                  onClick={handleBack}
-                  disabled={false}
-                >
-                  Back
-                </Button>
-                <Button type="submit" size="sm" className="font-medium">
-                  Next
-                </Button>
-              </div>
-            </form>
-          )}
+                <div className="flex justify-between pt-4">
+                  <Button
+                    type="button"
+                    className="font-medium"
+                    size="sm"
+                    onClick={handleBack}
+                    disabled={false}
+                  >
+                    Back
+                  </Button>
+                  <Button type="submit" size="sm" className="font-medium">
+                    Next
+                  </Button>
+                </div>
+              </form>
+            )}
 
-          {/* Styling step commented out for now - will be re-enabled later */}
-          {/* {step === 2 && (
+            {/* Styling step commented out for now - will be re-enabled later */}
+            {/* {step === 2 && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -594,59 +595,52 @@ export const GeneratedForm = () => {
             </form>
           )} */}
 
-          {step === 2 && (
-            <div className="grid gap-y-4">
-              <div
-                style={
-                  {
-                    "--radius-sm": borderRadius,
-                    "--radius-md": borderRadius,
-                    "--radius-lg": borderRadius,
-                    "--radius-xl": borderRadius,
-                  } as React.CSSProperties & {
-                    "--radius-sm": string;
-                    "--radius-md": string;
-                    "--radius-lg": string;
-                    "--radius-xl": string;
+            {step === 2 && (
+              <div className="grid gap-y-4">
+                <div
+                  style={
+                    {
+                      "--radius-sm": borderRadius,
+                      "--radius-md": borderRadius,
+                      "--radius-lg": borderRadius,
+                      "--radius-xl": borderRadius,
+                    } as React.CSSProperties & {
+                      "--radius-sm": string;
+                      "--radius-md": string;
+                      "--radius-lg": string;
+                      "--radius-xl": string;
+                    }
                   }
-                }
-              >
-                <Step4TestBot
-                  messages={messages}
-                  inputMessage={inputMessage}
-                  setInputMessage={setInputMessage}
-                  isLoading={isLoading}
-                  onSendMessage={handleSendMessage}
-                  onKeyPress={handleKeyPressWrapper}
-                  messagesEndRef={messagesEndRef}
-                  error={error}
-                  onClearMessages={handleClearMessages}
-                  suggestedQuestions={botData.suggestedQuestions}
-                  setMessages={setMessages}
-                />
-              </div>
+                >
+                  <Step4TestBot
+                    messages={messages}
+                    inputMessage={inputMessage}
+                    setInputMessage={setInputMessage}
+                    isLoading={isLoading}
+                    onSendMessage={handleSendMessage}
+                    onKeyPress={handleKeyPressWrapper}
+                    messagesEndRef={messagesEndRef}
+                    error={error}
+                    onClearMessages={handleClearMessages}
+                    suggestedQuestions={botData.suggestedQuestions}
+                    setMessages={setMessages}
+                  />
+                </div>
 
-              <div className="flex justify-between pt-4">
-                <Button
-                  type="button"
-                  className="font-medium"
-                  size="sm"
-                  onClick={handleBack}
-                  disabled={false}
-                >
-                  Back
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="font-medium"
-                  onClick={handleSubmit}
-                >
-                  Submit
-                </Button>
+                <div className="flex justify-start pt-4">
+                  <Button
+                    type="button"
+                    className="font-medium"
+                    size="sm"
+                    onClick={handleBack}
+                    disabled={false}
+                  >
+                    Back
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

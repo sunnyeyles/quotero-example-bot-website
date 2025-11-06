@@ -5,15 +5,17 @@ import { useRouter } from "next/navigation";
 import { GeneratedForm } from "@/components/create-bot/example";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MorphingText } from "@/components/ui/morphing-text";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 export default function Home() {
   const router = useRouter();
 
   return (
     <div className="min-h-screen">
-      <ThemeToggle />
+      <Navbar />
       {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 lg:py-32">
+      <section className="relative py-8 sm:py-12 md:py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-4 sm:mb-6 px-4 py-12">
@@ -53,21 +55,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Bot Identity Section */}
-      <section className="">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
               Create your own AI chatbot
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground">
-              Start by defining your bot&apos;s identity and personality
+              It will be trained on your website or business data.
             </p>
           </div>
 
           <GeneratedForm />
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
