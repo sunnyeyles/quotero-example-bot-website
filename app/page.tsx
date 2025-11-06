@@ -30,7 +30,7 @@ export default function Home() {
                   "Custom Chatbots Fitted to Your Veterinary Clinic",
                   "Custom Chatbots Fitted to Your Hairdresser",
                 ]}
-                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold"
+                className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold"
               />
             </div>
           </div>
@@ -68,8 +68,6 @@ export default function Home() {
           <GeneratedForm />
         </div>
       </section>
-      {/* setup lazy loading for the planet background */}
-      {/* <PlanetBackground /> */}
     </div>
   );
 }

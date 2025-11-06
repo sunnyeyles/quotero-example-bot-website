@@ -91,19 +91,18 @@ Example: If training data says "We offer plumbing services" but no business name
 
     const openingMessage =
       completion.choices[0]?.message?.content ||
-      generateFallbackOpening(nameToUse, botPersonality, trainingData);
+      generateFallbackOpening(nameToUse, botPersonality);
 
     // Fallback opening message generator based on personality
     function generateFallbackOpening(
       name: string,
-      personality: string,
-      trainingData?: string
+      personality: string
     ): string {
       const lowerPersonality = personality.toLowerCase();
 
       // Try to extract business name from training data (simple pattern matching)
       // The AI will do the heavy lifting, this is just a simple fallback
-      let businessContext = "";
+      const businessContext = "";
 
       if (
         lowerPersonality.includes("rude") ||

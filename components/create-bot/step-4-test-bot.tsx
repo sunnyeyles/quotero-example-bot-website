@@ -97,11 +97,7 @@ export function Step4TestBot({
 
   useEffect(() => {
     // Only animate typing for the opening message
-    if (
-      openingMessage &&
-      !hasTypedOpeningRef.current &&
-      typingText.length === 0
-    ) {
+    if (openingMessage && !hasTypedOpeningRef.current) {
       setIsTyping(true);
       setTypingText("");
       hasTypedOpeningRef.current = true;

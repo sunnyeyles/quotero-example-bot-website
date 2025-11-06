@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Step1BotIdentity } from "./step-1-bot-identity";
 import { Step2PreviewTraining } from "./step-2-preview-training";
-import { Step3StyleBot } from "./step-3-style-bot";
 import { Step4TestBot } from "./step-4-test-bot";
 import { useTrainYourOwnBot } from "@/hooks/useTrainYourOwnBot";
 import { BotData } from "@/lib/types";
@@ -49,8 +48,8 @@ export const GeneratedForm = () => {
   } = useTrainYourOwnBot();
 
   // Local state for styling (Step 3)
-  const [borderRadius, setBorderRadius] = useState(DEFAULT_STYLE.borderRadius);
-  const [font, setFont] = useState<
+  const [borderRadius] = useState(DEFAULT_STYLE.borderRadius);
+  const [font] = useState<
     "inter" | "spaceGrotesk" | "spaceMono" | "jetbrainsMono"
   >(DEFAULT_STYLE.font);
 
@@ -217,10 +216,11 @@ export const GeneratedForm = () => {
     }
   }, [
     step,
+    botData.name,
     botData.personality,
     botData.trainingData,
     botData.websiteContent,
-    messages.length,
+    messages,
     setMessages,
   ]);
 
@@ -389,11 +389,6 @@ export const GeneratedForm = () => {
       e.preventDefault();
       handleSendMessage();
     }
-  };
-
-  const handleResetStyle = () => {
-    setBorderRadius(DEFAULT_STYLE.borderRadius);
-    setFont(DEFAULT_STYLE.font);
   };
 
   // Wrapper for file upload that uses the hook's handler

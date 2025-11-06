@@ -18,10 +18,8 @@ export interface UseBotStepsReturn {
 }
 
 export function useBotSteps({
-  botData,
-  manualTrainingData,
   initialStep = 1,
-}: UseBotStepsOptions): UseBotStepsReturn {
+}: Omit<UseBotStepsOptions, "botData" | "manualTrainingData">): UseBotStepsReturn {
   const [currentStep, setCurrentStep] = useState(initialStep);
 
   // Step validation functions - all steps are optional, always allow proceeding

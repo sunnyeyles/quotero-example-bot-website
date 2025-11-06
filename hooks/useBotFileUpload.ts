@@ -17,10 +17,9 @@ export interface UseBotFileUploadReturn {
 }
 
 export function useBotFileUpload({
-  botData,
   setBotData,
   setError,
-}: UseBotFileUploadOptions): UseBotFileUploadReturn {
+}: Omit<UseBotFileUploadOptions, "botData">): UseBotFileUploadReturn {
   const isValidFileType = useCallback((file: File): boolean => {
     const validTypes = [
       "text/plain",

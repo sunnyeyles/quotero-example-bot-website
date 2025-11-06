@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BotData, Message } from "@/lib/types";
+import { Message } from "@/lib/types";
 import { useBotData } from "./useBotData";
 import { useBotFileUpload } from "./useBotFileUpload";
 import { useBotTrainingData } from "./useBotTrainingData";
@@ -16,11 +16,10 @@ export function useTrainYourOwnBot() {
   const [error, setError] = useState<string | null>(null);
 
   // Use bot data hook
-  const { botData, setBotData, updateBotData } = useBotData();
+  const { botData, setBotData } = useBotData();
 
   // Use file upload hook
   const { handleFileUpload, removeFile } = useBotFileUpload({
-    botData,
     setBotData,
     setError,
   });
@@ -48,7 +47,6 @@ export function useTrainYourOwnBot() {
     messagesEndRef,
     setMessages,
     setInputMessage,
-    setError: setChatError,
     sendMessage,
     handleKeyPress,
   } = useBotChat({
@@ -63,11 +61,9 @@ export function useTrainYourOwnBot() {
   }, [chatError, setError]);
 
   // Use steps hook
-  const { currentStep, setCurrentStep, nextStep, prevStep, canProceedToNext } =
-    useBotSteps({
-      botData,
-      manualTrainingData,
-    });
+  const { currentStep, nextStep, prevStep, canProceedToNext } = useBotSteps({
+    initialStep: 1,
+  });
 
   // Use sharing hook
   const { isCopied, shareConversation } = useBotSharing({

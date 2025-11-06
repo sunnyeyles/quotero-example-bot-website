@@ -20,6 +20,11 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: false,
+    },
+  },
 ];
 
 export default eslintConfig;
