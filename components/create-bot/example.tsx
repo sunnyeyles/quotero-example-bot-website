@@ -25,7 +25,7 @@ const DEFAULT_STYLE = {
 
 export const GeneratedForm = () => {
   const [step, setStep] = useState(0);
-  const totalSteps = 4;
+  const totalSteps = 3; // Temporarily 3 steps (styling step commented out)
   const hasGeneratedOpening = useRef(false);
 
   // Use the hook for bot functionality
@@ -101,15 +101,15 @@ export const GeneratedForm = () => {
     }
   }, [error]);
 
-  // Generate opening message when entering Step 4 (Test Bot)
+  // Generate opening message when entering Step 3 (Test Bot) - was Step 4 before styling step was commented out
   useEffect(() => {
-    // Only proceed if we're on Step 4
-    if (step !== 3) {
+    // Only proceed if we're on Step 3 (Test Bot) - step 2 in 0-indexed
+    if (step !== 2) {
       return;
     }
 
     // Check conditions
-    console.log("Step 4 opened - checking conditions:", {
+    console.log("Step 3 (Test Bot) opened - checking conditions:", {
       step,
       messagesLength: messages.length,
       botName: botData.name,
@@ -224,14 +224,14 @@ export const GeneratedForm = () => {
     setMessages,
   ]);
 
-  // Reset the flag when leaving Step 4
+  // Reset the flag when leaving Step 3 (Test Bot)
   useEffect(() => {
-    if (step !== 3) {
+    if (step !== 2) {
       hasGeneratedOpening.current = false;
     }
   }, [step]);
 
-  // Scroll form to center when step changes
+  // Scroll form to center when step changes (only when triggered by button clicks)
   const scrollFormToCenter = () => {
     // Use requestAnimationFrame to ensure DOM has updated
     requestAnimationFrame(() => {
@@ -252,16 +252,6 @@ export const GeneratedForm = () => {
     });
   };
 
-  // Scroll form to center when step changes
-  useEffect(() => {
-    // Small delay to ensure DOM has updated with new step content
-    const timeoutId = setTimeout(() => {
-      scrollFormToCenter();
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [step]);
-
   const handleSubmit = async () => {
     // If on step 0 (Bot Identity) and website URL is provided, scrape it first
     // If scraping fails, still allow proceeding (inputs are optional)
@@ -270,11 +260,19 @@ export const GeneratedForm = () => {
         await scrapeWebsiteIfProvided();
         // Proceed to next step regardless of scraping result
         setStep(step + 1);
+        // Scroll after step change
+        setTimeout(() => {
+          scrollFormToCenter();
+        }, 100);
       } catch (err) {
         // Error is already handled by the hook and shown via toast
         // Still proceed to next step even if scraping failed (inputs are optional)
         console.error("Failed to scrape website:", err);
         setStep(step + 1);
+        // Scroll after step change
+        setTimeout(() => {
+          scrollFormToCenter();
+        }, 100);
       }
       return;
     }
@@ -282,6 +280,10 @@ export const GeneratedForm = () => {
     // For other steps, proceed normally
     if (step < totalSteps - 1) {
       setStep(step + 1);
+      // Scroll after step change
+      setTimeout(() => {
+        scrollFormToCenter();
+      }, 100);
     } else {
       console.log({
         personality: botData.personality,
@@ -297,12 +299,20 @@ export const GeneratedForm = () => {
       });
       setStep(0);
       toast.success("Bot successfully created!");
+      // Scroll after step change
+      setTimeout(() => {
+        scrollFormToCenter();
+      }, 100);
     }
   };
 
   const handleBack = () => {
     if (step > 0) {
       setStep(step - 1);
+      // Scroll after step change
+      setTimeout(() => {
+        scrollFormToCenter();
+      }, 100);
     }
   };
 
@@ -319,7 +329,7 @@ export const GeneratedForm = () => {
     setMessages([]);
     hasGeneratedOpening.current = false; // Reset flag so opening message can be regenerated
     // Regenerate opening message after clearing
-    if (step === 3 && botData.name && botData.trainingData) {
+    if (step === 2 && botData.trainingData) {
       try {
         const response = await fetch("/api/generate-opening", {
           method: "POST",
@@ -327,7 +337,7 @@ export const GeneratedForm = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            botName: botData.name,
+            botName: botData.name || undefined,
             botPersonality: botData.personality || "friendly and helpful",
             trainingData: botData.trainingData,
           }),
@@ -347,11 +357,10 @@ export const GeneratedForm = () => {
           }
         } else {
           // Fallback opening message
-          const businessName = botData.name || "this business";
           const fallbackMsg = {
             id: Date.now().toString(),
             role: "assistant" as const,
-            content: `Welcome to ${businessName}, how can I help you?`,
+            content: `Hello! How can I help you today?`,
             timestamp: new Date(),
           };
           setMessages([fallbackMsg]);
@@ -360,11 +369,10 @@ export const GeneratedForm = () => {
       } catch (err) {
         console.error("Failed to generate opening message:", err);
         // Fallback opening message
-        const businessName = botData.name || "this business";
         const fallbackMsg = {
           id: Date.now().toString(),
           role: "assistant" as const,
-          content: `Welcome to ${businessName}, how can I help you?`,
+          content: `Hello! How can I help you today?`,
           timestamp: new Date(),
         };
         setMessages([fallbackMsg]);
@@ -411,8 +419,8 @@ export const GeneratedForm = () => {
   const stepTitles = [
     "Bot Identity & Content Feed",
     "Preview Training Data",
-    "Style Your Bot",
     "Test Bot",
+    // "Style Your Bot", // Commented out for now, will be re-enabled later
   ];
 
   return (
@@ -472,6 +480,7 @@ export const GeneratedForm = () => {
                     suggestedQuestions: questions,
                   }));
                 }}
+                onScrollToCenter={scrollFormToCenter}
               />
 
               <div className="flex justify-between pt-4">
@@ -531,7 +540,8 @@ export const GeneratedForm = () => {
             </form>
           )}
 
-          {step === 2 && (
+          {/* Styling step commented out for now - will be re-enabled later */}
+          {/* {step === 2 && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -587,9 +597,9 @@ export const GeneratedForm = () => {
                 </Button>
               </div>
             </form>
-          )}
+          )} */}
 
-          {step === 3 && (
+          {step === 2 && (
             <div className="grid gap-y-4">
               <div
                 style={

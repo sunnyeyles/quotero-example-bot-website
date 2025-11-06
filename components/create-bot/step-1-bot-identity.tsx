@@ -22,6 +22,7 @@ interface Step1BotIdentityProps {
   uploadedFiles?: Array<{ id: string; name: string }>;
   suggestedQuestions: SuggestedQuestion[];
   setSuggestedQuestions: (questions: SuggestedQuestion[]) => void;
+  onScrollToCenter?: () => void;
 }
 
 export function Step1BotIdentity({
@@ -38,6 +39,7 @@ export function Step1BotIdentity({
   uploadedFiles,
   suggestedQuestions,
   setSuggestedQuestions,
+  onScrollToCenter,
 }: Step1BotIdentityProps) {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -71,6 +73,17 @@ export function Step1BotIdentity({
       setSuggestedQuestions,
       maxQuestions: 3,
     });
+
+  // Handle adding question with scroll to center
+  const handleAddQuestion = () => {
+    addQuestion();
+    // Scroll to center after adding question (similar to back/next buttons)
+    if (onScrollToCenter) {
+      setTimeout(() => {
+        onScrollToCenter();
+      }, 100);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -179,7 +192,7 @@ export function Step1BotIdentity({
               type="button"
               variant="outline"
               size="sm"
-              onClick={addQuestion}
+              onClick={handleAddQuestion}
               disabled={!canAddMore}
               className="text-xs"
             >
