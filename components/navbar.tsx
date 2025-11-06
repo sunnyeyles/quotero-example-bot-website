@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { createPortal } from "react-dom";
-import { WordmarkIcon } from "@/components/logo";
 import { MenuToggleIcon } from "@/components/menu-toggle-icon";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useScroll } from "@/hooks/use-scroll";
@@ -47,7 +46,6 @@ export function Navbar() {
     >
       <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
         <div className="rounded-md p-2 hover:bg-accent">
-          {/* <WordmarkIcon className="h-4" /> */}
           <h2 className="text-lg font-bold">Quotero</h2>
         </div>
 

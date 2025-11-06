@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { GeneratedForm } from "@/components/create-bot/example";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { MorphingText } from "@/components/ui/morphing-text";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
