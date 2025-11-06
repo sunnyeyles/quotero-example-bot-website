@@ -11,18 +11,37 @@ export function Navbar() {
   const [open, setOpen] = React.useState(false);
   const scrolled = useScroll(10);
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      setOpen(false); // Close mobile menu after clicking
+    }
+  };
+
   const links = [
     {
       label: "Home",
       href: "#",
+      onClick: () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setOpen(false);
+      },
+    },
+    {
+      label: "Create",
+      href: "#create",
+      onClick: () => scrollToSection("create"),
     },
     {
       label: "Pricing",
-      href: "#",
+      href: "#pricing",
+      onClick: () => scrollToSection("pricing"),
     },
     {
       label: "Contact",
-      href: "#",
+      href: "#contact",
+      onClick: () => scrollToSection("contact"),
     },
   ];
 
@@ -45,15 +64,25 @@ export function Navbar() {
       })}
     >
       <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-        <div className="rounded-md p-2 hover:bg-accent">
+        <button
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            setOpen(false);
+          }}
+          className="rounded-md p-2 hover:bg-accent transition-colors cursor-pointer"
+        >
           <h2 className="text-lg font-bold">Quotero</h2>
-        </div>
+        </button>
 
         <div className="hidden items-center gap-2 md:flex">
           {links.map((link, i) => (
             <a
               className={buttonVariants({ variant: "ghost" })}
               href={link.href}
+              onClick={(e) => {
+                e.preventDefault();
+                link.onClick();
+              }}
               key={i}
             >
               {link.label}
@@ -84,6 +113,10 @@ export function Navbar() {
                 className: "justify-start",
               })}
               href={link.href}
+              onClick={(e) => {
+                e.preventDefault();
+                link.onClick();
+              }}
               key={link.label}
             >
               {link.label}

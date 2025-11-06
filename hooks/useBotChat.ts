@@ -33,16 +33,7 @@ export function useBotChat({ botData }: UseBotChatOptions): UseBotChatReturn {
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Utility functions
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages, scrollToBottom]);
+  // No automatic scrolling - let the component handle scrolling if needed
 
   // Load shared conversation messages from URL on mount
   useEffect(() => {

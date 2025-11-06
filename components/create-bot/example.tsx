@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -88,10 +88,7 @@ export const GeneratedForm = () => {
   // Training data is managed by the hook
   const trainingData = botData.trainingData;
 
-  // Auto-scroll messages (handled by hook, but ensure it works)
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, messagesEndRef]);
+  // No automatic scrolling - form stays in place
 
   // Show error toast if there's an error
   useEffect(() => {
@@ -232,7 +229,7 @@ export const GeneratedForm = () => {
   }, [step]);
 
   // Scroll form to center when step changes (only when triggered by button clicks)
-  const scrollFormToCenter = () => {
+  const scrollFormToCenter = useCallback(() => {
     // Use requestAnimationFrame to ensure DOM has updated
     requestAnimationFrame(() => {
       const formCard = document.querySelector(
@@ -243,14 +240,16 @@ export const GeneratedForm = () => {
         const cardCenter = cardRect.top + cardRect.height / 2;
         const viewportCenter = window.innerHeight / 2;
         const scrollOffset = cardCenter - viewportCenter;
+        const currentScrollY = window.scrollY;
+        const targetScrollY = currentScrollY + scrollOffset;
 
-        window.scrollBy({
-          top: scrollOffset,
+        window.scrollTo({
+          top: targetScrollY,
           behavior: "smooth",
         });
       }
     });
-  };
+  }, []);
 
   const handleSubmit = async () => {
     // If on step 0 (Bot Identity) and website URL is provided, scrape it first
@@ -323,11 +322,13 @@ export const GeneratedForm = () => {
       return;
     }
     await sendMessage(messageOverride);
+    // No scrolling - form stays in place
   };
 
   const handleClearMessages = async () => {
     setMessages([]);
     hasGeneratedOpening.current = false; // Reset flag so opening message can be regenerated
+    // No scrolling - form stays in place
     // Regenerate opening message after clearing
     if (step === 2 && botData.trainingData) {
       try {

@@ -1,14 +1,20 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { GeneratedForm } from "@/components/create-bot/example";
 import { MorphingText } from "@/components/ui/morphing-text";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { PricingCards } from "@/components/pricing-cards";
+import { ContactForm } from "@/components/contact-form";
 
 export default function Home() {
-  const router = useRouter();
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -39,14 +45,14 @@ export default function Home() {
             <Button
               variant="default"
               className="w-full sm:w-auto text-lg"
-              onClick={() => router.push("/")}
+              onClick={() => scrollToSection("contact")}
             >
               Book a Demo
             </Button>
             <Button
               variant="secondary"
               className="w-full sm:w-auto text-lg"
-              onClick={() => router.push("/")}
+              onClick={() => scrollToSection("pricing")}
             >
               Pricing
             </Button>
@@ -54,7 +60,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24">
+      <section
+        id="create"
+        className="py-12 sm:py-16 md:py-20 lg:py-24 scroll-mt-20"
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
@@ -66,6 +75,43 @@ export default function Home() {
           </div>
 
           <GeneratedForm />
+        </div>
+      </section>
+
+      <section
+        id="pricing"
+        className="py-12 sm:py-16 md:py-20 lg:py-24 scroll-mt-20"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+              Pricing
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground">
+              Choose the plan that fits your needs
+            </p>
+          </div>
+
+          <PricingCards />
+        </div>
+      </section>
+
+      <section
+        id="contact"
+        className="py-12 sm:py-16 md:py-20 lg:py-24 scroll-mt-20"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+              Book a Demo
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground">
+              Curious how a chatbot can boost your business? Schedule a quick
+              demo and see it in action.
+            </p>
+          </div>
+
+          <ContactForm />
         </div>
       </section>
 

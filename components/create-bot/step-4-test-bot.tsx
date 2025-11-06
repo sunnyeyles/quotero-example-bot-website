@@ -23,7 +23,7 @@ interface Step4TestBotProps {
   isLoading: boolean;
   onSendMessage: (message?: string) => void | Promise<void>;
   onKeyPress: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef?: React.RefObject<HTMLDivElement>; // Optional - not used for scrolling
   error?: string | null;
   onClearMessages?: () => void;
   suggestedQuestions?: SuggestedQuestion[];
@@ -37,12 +37,22 @@ export function Step4TestBot({
   isLoading,
   onSendMessage,
   onKeyPress,
-  messagesEndRef,
+  messagesEndRef: _messagesEndRef, // Unused - kept for interface compatibility
   error,
   onClearMessages,
   suggestedQuestions = [],
   setMessages,
 }: Step4TestBotProps) {
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll messages container to bottom when messages change (container only, not page)
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || isLoading) return;
@@ -140,7 +150,7 @@ export function Step4TestBot({
         }
       };
     }
-  }, [openingMessage?.id, openingMessage?.content]);
+  }, [openingMessage]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -171,7 +181,10 @@ export function Step4TestBot({
           )}
 
           {/* Messages */}
-          <div className="space-y-4 max-h-96 min-h-[300px] overflow-y-auto mb-4">
+          <div
+            ref={messagesContainerRef}
+            className="space-y-4 max-h-96 min-h-[300px] overflow-y-auto mb-4"
+          >
             {messages.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 <Bot className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
@@ -265,7 +278,6 @@ export function Step4TestBot({
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           <Separator />
