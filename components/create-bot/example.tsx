@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,6 +26,7 @@ const DEFAULT_STYLE = {
 export const GeneratedForm = () => {
   const [step, setStep] = useState(0);
   const totalSteps = 4;
+  const hasGeneratedOpening = useRef(false);
 
   // Use the hook for bot functionality
   const {
@@ -38,11 +39,13 @@ export const GeneratedForm = () => {
     inputMessage,
     setInputMessage,
     isLoading,
+    isScraping,
     sendMessage,
     messagesEndRef,
     error,
     handleFileUpload: hookHandleFileUpload,
     removeFile: hookRemoveFile,
+    scrapeWebsiteIfProvided,
   } = useTrainYourOwnBot();
 
   // Local state for styling (Step 3)
@@ -98,7 +101,185 @@ export const GeneratedForm = () => {
     }
   }, [error]);
 
+  // Generate opening message when entering Step 4 (Test Bot)
+  useEffect(() => {
+    // Only proceed if we're on Step 4
+    if (step !== 3) {
+      return;
+    }
+
+    // Check conditions
+    console.log("Step 4 opened - checking conditions:", {
+      step,
+      messagesLength: messages.length,
+      botName: botData.name,
+      hasGenerated: hasGeneratedOpening.current,
+      hasTrainingData: !!botData.trainingData,
+      trainingDataLength: botData.trainingData?.length || 0,
+    });
+
+    // Only generate if messages are empty (or only has opening message) and we haven't generated yet
+    // Check if there are no user messages (opening message is assistant message)
+    const hasUserMessages = messages.some((msg) => msg.role === "user");
+    const shouldGenerate = !hasUserMessages && !hasGeneratedOpening.current;
+
+    if (shouldGenerate) {
+      const generateOpeningMessage = async () => {
+        // Check if we have training data, but don't require it (we'll use what we have)
+        const trainingDataToUse =
+          botData.trainingData || botData.websiteContent || "";
+
+        console.log("Generating opening message with:", {
+          botName: botData.name,
+          personality: botData.personality,
+          hasTrainingData: !!botData.trainingData,
+          trainingDataLength: botData.trainingData?.length || 0,
+          websiteContentLength: botData.websiteContent?.length || 0,
+          trainingDataToUseLength: trainingDataToUse.length,
+        });
+
+        try {
+          const response = await fetch("/api/generate-opening", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              botName: botData.name || undefined,
+              botPersonality: botData.personality || "friendly and helpful",
+              trainingData: trainingDataToUse,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.openingMessage) {
+              console.log("Generated opening message:", data.openingMessage);
+              const openingMsg = {
+                id: Date.now().toString(),
+                role: "assistant" as const,
+                content: data.openingMessage,
+                timestamp: new Date(),
+              };
+              setMessages([openingMsg]);
+              hasGeneratedOpening.current = true;
+            } else {
+              console.warn("No opening message in API response");
+              // Fallback opening message
+              const fallbackMsg = {
+                id: Date.now().toString(),
+                role: "assistant" as const,
+                content: `Hello! How can I help you today?`,
+                timestamp: new Date(),
+              };
+              setMessages([fallbackMsg]);
+              hasGeneratedOpening.current = true;
+            }
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("API error response:", response.status, errorData);
+            // Fallback opening message
+            const fallbackMsg = {
+              id: Date.now().toString(),
+              role: "assistant" as const,
+              content: `Hello! How can I help you today?`,
+              timestamp: new Date(),
+            };
+            setMessages([fallbackMsg]);
+            hasGeneratedOpening.current = true;
+          }
+        } catch (err) {
+          console.error("Failed to generate opening message:", err);
+          // Fallback opening message
+          const fallbackMsg = {
+            id: Date.now().toString(),
+            role: "assistant" as const,
+            content: `Hello! How can I help you today?`,
+            timestamp: new Date(),
+          };
+          setMessages([fallbackMsg]);
+          hasGeneratedOpening.current = true;
+        }
+      };
+
+      // Add a delay to ensure training data is populated (training data hook has 500ms debounce)
+      const timeoutId = setTimeout(() => {
+        generateOpeningMessage();
+      }, 600); // Increased delay to ensure training data is ready
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      console.log("Skipping opening message generation:", {
+        messagesLength: messages.length,
+        hasUserMessages,
+        hasGenerated: hasGeneratedOpening.current,
+      });
+    }
+  }, [
+    step,
+    botData.personality,
+    botData.trainingData,
+    botData.websiteContent,
+    messages.length,
+    setMessages,
+  ]);
+
+  // Reset the flag when leaving Step 4
+  useEffect(() => {
+    if (step !== 3) {
+      hasGeneratedOpening.current = false;
+    }
+  }, [step]);
+
+  // Scroll form to center when step changes
+  const scrollFormToCenter = () => {
+    // Use requestAnimationFrame to ensure DOM has updated
+    requestAnimationFrame(() => {
+      const formCard = document.querySelector(
+        "[data-form-card]"
+      ) as HTMLElement;
+      if (formCard) {
+        const cardRect = formCard.getBoundingClientRect();
+        const cardCenter = cardRect.top + cardRect.height / 2;
+        const viewportCenter = window.innerHeight / 2;
+        const scrollOffset = cardCenter - viewportCenter;
+
+        window.scrollBy({
+          top: scrollOffset,
+          behavior: "smooth",
+        });
+      }
+    });
+  };
+
+  // Scroll form to center when step changes
+  useEffect(() => {
+    // Small delay to ensure DOM has updated with new step content
+    const timeoutId = setTimeout(() => {
+      scrollFormToCenter();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [step]);
+
   const handleSubmit = async () => {
+    // If on step 0 (Bot Identity) and website URL is provided, scrape it first
+    // If scraping fails, still allow proceeding (inputs are optional)
+    if (step === 0 && botData.websiteUrl.trim()) {
+      try {
+        await scrapeWebsiteIfProvided();
+        // Proceed to next step regardless of scraping result
+        setStep(step + 1);
+      } catch (err) {
+        // Error is already handled by the hook and shown via toast
+        // Still proceed to next step even if scraping failed (inputs are optional)
+        console.error("Failed to scrape website:", err);
+        setStep(step + 1);
+      }
+      return;
+    }
+
+    // For other steps, proceed normally
     if (step < totalSteps - 1) {
       setStep(step + 1);
     } else {
@@ -125,16 +306,71 @@ export const GeneratedForm = () => {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !botData.personality) {
-      toast.error("Please provide a message and set personality traits");
+  const handleSendMessage = async (messageOverride?: string) => {
+    const messageToSend = messageOverride || inputMessage;
+    if (!messageToSend.trim()) {
+      toast.error("Please provide a message");
       return;
     }
-    await sendMessage();
+    await sendMessage(messageOverride);
   };
 
-  const handleClearMessages = () => {
+  const handleClearMessages = async () => {
     setMessages([]);
+    hasGeneratedOpening.current = false; // Reset flag so opening message can be regenerated
+    // Regenerate opening message after clearing
+    if (step === 3 && botData.name && botData.trainingData) {
+      try {
+        const response = await fetch("/api/generate-opening", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            botName: botData.name,
+            botPersonality: botData.personality || "friendly and helpful",
+            trainingData: botData.trainingData,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.openingMessage) {
+            const openingMsg = {
+              id: Date.now().toString(),
+              role: "assistant" as const,
+              content: data.openingMessage,
+              timestamp: new Date(),
+            };
+            setMessages([openingMsg]);
+            hasGeneratedOpening.current = true;
+          }
+        } else {
+          // Fallback opening message
+          const businessName = botData.name || "this business";
+          const fallbackMsg = {
+            id: Date.now().toString(),
+            role: "assistant" as const,
+            content: `Welcome to ${businessName}, how can I help you?`,
+            timestamp: new Date(),
+          };
+          setMessages([fallbackMsg]);
+          hasGeneratedOpening.current = true;
+        }
+      } catch (err) {
+        console.error("Failed to generate opening message:", err);
+        // Fallback opening message
+        const businessName = botData.name || "this business";
+        const fallbackMsg = {
+          id: Date.now().toString(),
+          role: "assistant" as const,
+          content: `Welcome to ${businessName}, how can I help you?`,
+          timestamp: new Date(),
+        };
+        setMessages([fallbackMsg]);
+        hasGeneratedOpening.current = true;
+      }
+    }
   };
 
   // Wrapper for key press that handles both Input and Textarea
@@ -202,7 +438,7 @@ export const GeneratedForm = () => {
           </div>
         ))}
       </div>
-      <Card className="shadow-sm">
+      <Card className="shadow-sm" data-form-card>
         <CardHeader>
           <CardTitle className="text-lg">Create Your Bot</CardTitle>
           <CardDescription>
@@ -229,6 +465,13 @@ export const GeneratedForm = () => {
                 onFileUpload={handleFileUpload}
                 onRemoveFile={handleRemoveFile}
                 uploadedFiles={uploadedFiles}
+                suggestedQuestions={botData.suggestedQuestions}
+                setSuggestedQuestions={(questions) => {
+                  setBotData((prev: BotData) => ({
+                    ...prev,
+                    suggestedQuestions: questions,
+                  }));
+                }}
               />
 
               <div className="flex justify-between pt-4">
@@ -241,8 +484,13 @@ export const GeneratedForm = () => {
                 >
                   Back
                 </Button>
-                <Button type="submit" size="sm" className="font-medium">
-                  Next
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="font-medium"
+                  disabled={isScraping}
+                >
+                  {isScraping ? "Training bot..." : "Next"}
                 </Button>
               </div>
             </form>
@@ -368,6 +616,8 @@ export const GeneratedForm = () => {
                   messagesEndRef={messagesEndRef}
                   error={error}
                   onClearMessages={handleClearMessages}
+                  suggestedQuestions={botData.suggestedQuestions}
+                  setMessages={setMessages}
                 />
               </div>
 

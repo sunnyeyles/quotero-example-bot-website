@@ -5,6 +5,11 @@ export interface Message {
   timestamp: Date;
 }
 
+export interface SuggestedQuestion {
+  question: string;
+  answer: string;
+}
+
 export interface BotData {
   name: string;
   personality: string;
@@ -12,6 +17,7 @@ export interface BotData {
   files: UploadedFile[];
   websiteUrl: string;
   websiteContent: string;
+  suggestedQuestions: SuggestedQuestion[];
   style?: {
     borderRadius: string; // e.g. "0.5rem"
     font: "inter" | "spaceGrotesk" | "spaceMono" | "jetbrainsMono";

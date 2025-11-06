@@ -4,7 +4,9 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Plus } from "lucide-react";
+import { SuggestedQuestion } from "@/lib/types";
+import { useSuggestedQuestions } from "@/hooks/useSuggestedQuestions";
 
 interface Step1BotIdentityProps {
   personality: string;
@@ -18,6 +20,8 @@ interface Step1BotIdentityProps {
   onFileUpload?: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   onRemoveFile?: (fileIdOrIndex: string | number) => void;
   uploadedFiles?: Array<{ id: string; name: string }>;
+  suggestedQuestions: SuggestedQuestion[];
+  setSuggestedQuestions: (questions: SuggestedQuestion[]) => void;
 }
 
 export function Step1BotIdentity({
@@ -32,8 +36,12 @@ export function Step1BotIdentity({
   onFileUpload,
   onRemoveFile,
   uploadedFiles,
+  suggestedQuestions,
+  setSuggestedQuestions,
 }: Step1BotIdentityProps) {
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (onFileUpload) {
       await onFileUpload(event);
     } else if (setFiles) {
@@ -53,13 +61,22 @@ export function Step1BotIdentity({
   };
 
   // Use uploadedFiles if available (from hook), otherwise use files
-  const displayFiles = uploadedFiles || files.map((f, i) => ({ id: i.toString(), name: f.name }));
+  const displayFiles =
+    uploadedFiles || files.map((f, i) => ({ id: i.toString(), name: f.name }));
+
+  // Use hook for suggested questions logic
+  const { addQuestion, removeQuestion, updateQuestion, canAddMore } =
+    useSuggestedQuestions({
+      suggestedQuestions,
+      setSuggestedQuestions,
+      maxQuestions: 3,
+    });
 
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-1">
-          Personality traits *
+          Personality traits
         </label>
         <Textarea
           value={personality}
@@ -152,8 +169,85 @@ export function Step1BotIdentity({
             className="min-h-[120px]"
           />
         </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-medium">
+              Suggested Questions & Answers
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addQuestion}
+              disabled={!canAddMore}
+              className="text-xs"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Add Question
+            </Button>
+          </div>
+
+          {suggestedQuestions.length === 0 && (
+            <p className="text-sm text-muted-foreground mb-3">
+              Add up to 3 suggested questions and answers to help guide users.
+            </p>
+          )}
+
+          <div className="space-y-4">
+            {suggestedQuestions.map((item, index) => (
+              <div key={index} className="p-4 border rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Question & Answer {index + 1}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeQuestion(index)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
+                    Question {index + 1}
+                  </label>
+                  <Input
+                    value={item.question}
+                    onChange={(e) =>
+                      updateQuestion(index, "question", e.target.value)
+                    }
+                    placeholder="Enter a suggested question..."
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
+                    Answer {index + 1}
+                  </label>
+                  <Textarea
+                    value={item.answer}
+                    onChange={(e) =>
+                      updateQuestion(index, "answer", e.target.value)
+                    }
+                    placeholder="Enter the answer to this question..."
+                    className="min-h-[80px]"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {suggestedQuestions.length >= 3 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Maximum of 3 suggested questions reached.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-

@@ -9,16 +9,19 @@ export async function POST(request: NextRequest) {
   try {
     const { botName, botPersonality, trainingData } = await request.json();
 
-    if (!botName || !botPersonality) {
+    if (!botPersonality) {
       return NextResponse.json(
-        { error: "Bot name and personality are required" },
+        { error: "Bot personality is required" },
         { status: 400 }
       );
     }
 
+    // Use a default name if not provided
+    const nameToUse = botName || "your assistant";
+
     // Create personality-based system prompt
     const personalityConfig = {
-      name: botName,
+      name: nameToUse,
       personality: botPersonality,
       tone: botPersonality,
       behaviour: botPersonality,
@@ -39,20 +42,42 @@ CRITICAL INSTRUCTIONS:
 The opening message should:
 - Be 1-2 sentences maximum
 - Match the personality exactly
-- Introduce the bot with their name
+- If a bot name is provided, introduce the bot with their name
+- If no bot name is provided, focus on the business context from training data
 - Use British English spelling
-- Be specific to the business context
+- Be specific to the business context from the training data
 
 Format: Generate only the opening message text, no additional formatting or explanations.`;
 
     const userPrompt = `Generate an opening message for a chatbot:
 
-Bot Name: ${botName}
+${
+  botName
+    ? `Bot Name: ${botName}`
+    : "Bot Name: Not provided (focus on business context)"
+}
 Bot Personality: ${botPersonality}
 
 Business Info: ${trainingData || "No specific training data provided"}
 
-Create an opening message that matches the personality exactly. If the personality is "rude and vague", make it rude and vague. If it's "friendly and helpful", make it friendly and helpful.`;
+IMPORTANT: Carefully analyze the training data above to identify:
+1. The business name (look for phrases like "Joe's fruit shop", "ABC Plumbing", company names, shop names, etc.)
+2. The type of business (e.g., fruit shop, plumbing service, restaurant, store, etc.)
+3. Key products/services mentioned
+
+If the training data mentions a specific business name (like "Joe's fruit shop" or "ABC Plumbing"), use that exact name in the opening message.
+
+Create an opening message that:
+- If a business name is found in the training data, use it (e.g., "Welcome to Joe's fruit shop, how can I help you?" or "Hello! Welcome to Joe's fruit shop. How can I assist you today?")
+- If no specific business name is found but training data exists, create a welcoming message based on the business type and context (e.g., "Hello! Welcome. How can I help you today?" or "Hi there! I'm here to help you with [business type] questions.")
+- If a bot name is provided, you may include it, but prioritize the business context from training data
+- Matches the personality exactly. If the personality is "rude and vague", make it rude and vague. If it's "friendly and helpful", make it friendly and helpful.
+- Is specific to the business context from the training data
+- Is 1-2 sentences maximum
+- Uses British English spelling
+
+Example: If training data says "Joe's fruit shop sells fresh fruits and vegetables", the opening message should be: "Welcome to Joe's fruit shop, how can I help you?"
+Example: If training data says "We offer plumbing services" but no business name, the opening message could be: "Hello! Welcome. How can I help you with your plumbing needs today?"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -66,32 +91,45 @@ Create an opening message that matches the personality exactly. If the personali
 
     const openingMessage =
       completion.choices[0]?.message?.content ||
-      generateFallbackOpening(botName, botPersonality);
+      generateFallbackOpening(nameToUse, botPersonality, trainingData);
 
     // Fallback opening message generator based on personality
     function generateFallbackOpening(
       name: string,
-      personality: string
+      personality: string,
+      trainingData?: string
     ): string {
       const lowerPersonality = personality.toLowerCase();
+
+      // Try to extract business name from training data (simple pattern matching)
+      // The AI will do the heavy lifting, this is just a simple fallback
+      let businessContext = "";
 
       if (
         lowerPersonality.includes("rude") ||
         lowerPersonality.includes("vague")
       ) {
-        return `Yeah, I'm ${name}. What do you want?`;
+        return businessContext
+          ? `Yeah, what do you want?`
+          : `What do you want?`;
       } else if (
         lowerPersonality.includes("friendly") ||
         lowerPersonality.includes("helpful")
       ) {
-        return `Hi there! I'm ${name} and I'm here to help you with whatever you need. How can I assist you today?`;
+        return businessContext
+          ? `Hello! Welcome to ${businessContext}. How can I help you today?`
+          : `Hello! How can I help you today?`;
       } else if (
         lowerPersonality.includes("professional") ||
         lowerPersonality.includes("formal")
       ) {
-        return `Good day. I am ${name}, your professional assistant. How may I be of service?`;
+        return businessContext
+          ? `Good day. Welcome to ${businessContext}. How may I assist you?`
+          : `Good day. How may I assist you?`;
       } else {
-        return `Hello! I'm ${name} from this business. I'm here to help you with your needs. How can I assist you today?`;
+        return businessContext
+          ? `Hello! Welcome to ${businessContext}. How can I help you today?`
+          : `Hello! How can I help you today?`;
       }
     }
 
